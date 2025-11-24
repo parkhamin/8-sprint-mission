@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Channel extends Common{
     private String channelName; // 채널의 이름
-    private final Set<UUID> userIds = new HashSet<>(); // 채널에 들어온 사용자들의 ID들 (중복 불가능)
+    private final Set<UUID> userIds = new HashSet<>(); // 채널에 들어온 사용자들의 ID들과 사용자들의 이름 (중복 불가능)
     private final List<UUID> messageIds = new ArrayList<>(); // 채널에 보낸 메시지들의 ID들 (중복 가능)
 
     public Channel(String channelName) { // 생성자의 파라미터를 통해 초기화
@@ -21,7 +21,7 @@ public class Channel extends Common{
         update();
     }
 
-    public Set<UUID> getUserIds() {
+    public Set<UUID> getUsers() {
         return userIds;
     }
 
