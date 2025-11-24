@@ -24,8 +24,11 @@ public class JCFUserService implements UserService {
     public void updateUser(UUID userId, String newUserName) {
         User user = users.get(userId); // 사용자의 ID로 사용자의 정보를 수정할 한 명의 사용자 객체를 가져와서 저장.
 
-        if (users.containsKey(userId)) { // 만약 그 사용자의 ID가 hashmap에 있다면
+        /*if (users.containsKey(userId)) { // 만약 그 사용자의 ID가 hashmap에 있다면 (중복 검사 -> 불필요한 코드)
             user.updateUserName(newUserName); // 그 객체의 정보를 수정
+        }*/
+        if (user != null) { // 사용자의 ID를 hashmap에서 찾았다면 user 객체는 null이 아닐 것
+            user.updateUserName(newUserName);
         }
     }
 
