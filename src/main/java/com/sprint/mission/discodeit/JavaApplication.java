@@ -3,8 +3,6 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
@@ -16,8 +14,9 @@ import java.util.stream.Collectors;
 public class JavaApplication {
     public static void main(String[] args) {
         UserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        ChannelService channelService = new JCFChannelService();
-        MessageService messageService = new JCFMessageService();
+        JCFMessageService messageService = new JCFMessageService(userService, null);
+        JCFChannelService channelService = new JCFChannelService(messageService);
+        messageService.setChannelService(channelService);
 
         User user1 = new User("user1");
         User user2 = new User("user2");
@@ -96,6 +95,7 @@ public class JavaApplication {
         Message message3 = new Message("user3가 ch03에서 보내는 메시지입니다.", user3.getId(), channel3.getId());
         Message message4 = new Message("user2가 ch01에서 보내는 메시지입니다.", user2.getId(), channel1.getId());
         Message message5 = new Message("user2가 ch02에서 보내는 메시지입니다.", user2.getId(), channel2.getId());
+        // Message message6 = new Message("잘못된 사용자", user1.getId(), channel2.getId());
 
         System.out.println("==================== 메시지 생성 ====================");
         messageService.createMessage(message1);
@@ -103,17 +103,19 @@ public class JavaApplication {
         messageService.createMessage(message3);
         messageService.createMessage(message4);
         messageService.createMessage(message5);
+        // messageService.createMessage(message6);
 
         messageService.getAllMessages()
                 .forEach(message -> System.out.println(message.getContent()
                         + " 객체가 만들어진 시간: " + message.getCreatedAt()));
 
         //System.out.println("========== 메시지 보냄 ==========");
-        channelService.sendMessage(channel3.getId(), message1.getId());
-        channelService.sendMessage(channel1.getId(), message2.getId());
-        channelService.sendMessage(channel3.getId(), message3.getId());
-        channelService.sendMessage(channel1.getId(), message4.getId());
-        channelService.sendMessage(channel2.getId(), message5.getId());
+        channelService.sendMessage(channel3, message1);
+        channelService.sendMessage(channel1, message2);
+        channelService.sendMessage(channel3, message3);
+        channelService.sendMessage(channel1, message4);
+        channelService.sendMessage(channel2, message5);
+        //channelService.sendMessage(channel3, message6);
 
         /* 1. 모든 메시지들의 목록을 향상된 for문으로 작성
         for (Message message : messageService.getAllMessages()) {

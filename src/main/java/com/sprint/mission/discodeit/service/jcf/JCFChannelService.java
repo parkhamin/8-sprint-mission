@@ -3,12 +3,18 @@ package com.sprint.mission.discodeit.service.jcf;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.MessageService;
 
 import java.util.*;
 
 public class JCFChannelService implements ChannelService {
     // 채널의 ID와 채널의 정보를 담을 객체 hash map 생성
     private final Map<UUID, Channel> channels = new HashMap<>();
+    private final MessageService messageService;
+
+    public JCFChannelService(MessageService messageService) {
+        this.messageService = messageService;
+    }
 
     @Override
     public Channel createChannel(Channel channel) {
@@ -36,12 +42,11 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void sendMessage(UUID channelId, UUID messageId) {
-        Channel channel = channels.get(channelId);
-
-        if (channel != null) {
-            channel.addMessage(channelId);
-        }
+    public void sendMessage(Channel channel, Message message) {
+        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (message == null) throw new IllegalArgumentException("보내려는 메시지가 존재하지 않습니다.");
+        if (!channel.getUsers().contains(message.getSender())) throw new IllegalArgumentException("보내려는 사용자가 존재하지 않습니다.");
+        channel.addMessage(channel.getId());
     }
 
     @Override

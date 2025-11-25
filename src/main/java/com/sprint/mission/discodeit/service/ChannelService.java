@@ -11,6 +11,6 @@ public interface ChannelService {
     Channel getChannel(UUID channelId); // 채널 조회
     void updateChannel(UUID channelId, String newChannelName);
     void deleteChannel(UUID channelId);
-    void sendMessage(UUID channelId, UUID messageId);
+    void sendMessage(Channel channel, Message message);
     List<Channel> getAllChannels(); //
 }
