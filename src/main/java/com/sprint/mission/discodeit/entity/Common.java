@@ -22,6 +22,7 @@ abstract class Common { // 공통으로 사용 -> 추상클래스로 선언
     public UUID getId() {
         return id;
     }
+
     public long getCreatedAt() {
         return createdAt;
     }

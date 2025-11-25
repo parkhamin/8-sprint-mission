@@ -28,6 +28,10 @@ public class JavaApplication {
         userService.createUser(user2);
         userService.createUser(user3);
 
+        userService.getAllUsers()
+                .forEach(user -> System.out.println(user.getUserName()
+                        + " 객체가 만들어진 시간: " + user.getCreatedAt()));
+
         // 모든 회원 출력
         System.out.println("==================== 모든 사용자 조회 ====================");
         userService.getAllUsers().stream()
@@ -41,6 +45,10 @@ public class JavaApplication {
         channelService.createChannel(channel1);
         channelService.createChannel(channel2);
         channelService.createChannel(channel3);
+
+        channelService.getAllChannels()
+                .forEach(channel -> System.out.println(channel.getChannelName()
+                        + " 객체가 만들어진 시간: " + channel.getCreatedAt()));
 
         System.out.println("==================== 모든 채널 조회 ====================");
         channelService.getAllChannels().stream()
@@ -89,13 +97,16 @@ public class JavaApplication {
         Message message4 = new Message("user2가 ch01에서 보내는 메시지입니다.", user2.getId(), channel1.getId());
         Message message5 = new Message("user2가 ch02에서 보내는 메시지입니다.", user2.getId(), channel2.getId());
 
-
         System.out.println("==================== 메시지 생성 ====================");
         messageService.createMessage(message1);
         messageService.createMessage(message2);
         messageService.createMessage(message3);
         messageService.createMessage(message4);
         messageService.createMessage(message5);
+
+        messageService.getAllMessages()
+                .forEach(message -> System.out.println(message.getContent()
+                        + " 객체가 만들어진 시간: " + message.getCreatedAt()));
 
         //System.out.println("========== 메시지 보냄 ==========");
         channelService.sendMessage(channel3.getId(), message1.getId());
@@ -147,15 +158,27 @@ public class JavaApplication {
         userService.updateUser(user1.getId(), "변경된 user1");
         System.out.println(" -> " + userService.getUser(user1.getId()).getUserName()); // user1 특정 사용자 조회
 
+        userService.getAllUsers()
+                .forEach(user -> System.out.println(user.getUserName()
+                        + " 객체가 수정된 시간: " + user.getUpdatedAt()));
+
         System.out.println("==================== 채널 정보 수정 ====================");
         System.out.print("채널 이름: " + channelService.getChannel(channel1.getId()).getChannelName());
         channelService.updateChannel(channel1.getId(), "변경된 ch01");
         System.out.println(" -> " + channelService.getChannel(channel1.getId()).getChannelName());
 
+        channelService.getAllChannels()
+                .forEach(channel -> System.out.println(channel.getChannelName()
+                        + " 객체가 수정된 시간: " + channel.getUpdatedAt()));
+
         System.out.println("==================== 메시지 정보 수정 ====================");
         System.out.print("메시지 내용: " + messageService.getMessage(message1.getId()).getContent());
         messageService.updateMessage(message1.getId(),"user2가 ch03에서 보내는 변경된 메시지입니다.");
         System.out.println(" -> " + messageService.getMessage(message1.getId()).getContent());
+
+        messageService.getAllMessages()
+                .forEach(message -> System.out.println(message.getContent()
+                        + " 객체가 수정된 시간: " + message.getUpdatedAt()));
 
         System.out.println("==================== 메시지 삭제 후 모든 메시지 목록 ====================");
         System.out.println("user2가 ch03에서 보내는 변경된 메시지입니다. 삭제된 것 확인");
