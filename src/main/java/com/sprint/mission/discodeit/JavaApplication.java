@@ -110,11 +110,11 @@ public class JavaApplication {
                         + " 객체가 만들어진 시간: " + message.getCreatedAt()));
 
         //System.out.println("========== 메시지 보냄 ==========");
-        channelService.sendMessage(channel3, message1);
-        channelService.sendMessage(channel1, message2);
-        channelService.sendMessage(channel3, message3);
-        channelService.sendMessage(channel1, message4);
-        channelService.sendMessage(channel2, message5);
+        channelService.sendMessage(channel3.getId(), message1.getId());
+        channelService.sendMessage(channel1.getId(), message2.getId());
+        channelService.sendMessage(channel3.getId(), message3.getId());
+        channelService.sendMessage(channel1.getId(), message4.getId());
+        channelService.sendMessage(channel2.getId(), message5.getId());
         //channelService.sendMessage(channel3, message6);
 
         /* 1. 모든 메시지들의 목록을 향상된 for문으로 작성
