@@ -4,18 +4,18 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 
 import java.util.stream.Collectors;
 
-public class JavaApplication {
+public class FileJCFJavaApplication {
     public static void main(String[] args) {
-        // 1. JCF**Service 버전
-        UserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        JCFMessageService messageService = new JCFMessageService(userService, null);
-        JCFChannelService channelService = new JCFChannelService(messageService);
+        // 2. FILE**Service 버전
+        UserService userService = new FileUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        FileMessageService messageService = new FileMessageService(userService, null);
+        FileChannelService channelService = new FileChannelService(messageService);
         messageService.setChannelService(channelService);
 
         User user1 = new User("user1");
