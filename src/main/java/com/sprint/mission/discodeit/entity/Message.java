@@ -29,4 +29,13 @@ public class Message extends Common {
     public UUID getChannelId() {
         return channelId;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "content='" + content + '\'' +
+                ", sender=" + sender +
+                ", channelId=" + channelId +
+                '}' + super.toString();
+    }
 }

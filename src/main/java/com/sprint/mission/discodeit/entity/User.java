@@ -22,7 +22,11 @@ public class User extends Common{
         update();
     }
 
-    public Set<UUID> getChannelIds() {
-        return channelIds;
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", channelIds=" + channelIds +
+                '}' + super.toString();
     }
 }

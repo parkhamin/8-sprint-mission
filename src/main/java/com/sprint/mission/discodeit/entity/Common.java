@@ -34,4 +34,13 @@ abstract class Common { // 공통으로 사용 -> 추상클래스로 선언
     protected void update(){
         this.updatedAt = System.currentTimeMillis();
     }
+
+    @Override
+    public String toString() {
+        return "Common{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

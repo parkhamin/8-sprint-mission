@@ -25,10 +25,6 @@ public class Channel extends Common{
         return userIds;
     }
 
-    public List<UUID> getMessageIds() {
-        return messageIds;
-    }
-
     public void addUser(UUID uuid) { // 채널에 사용자가 입장
         userIds.add(uuid);
     }
@@ -39,5 +35,14 @@ public class Channel extends Common{
 
     public void addMessage(UUID messageId) { // 채널에 어떤 사용자가 메시지를 보냄
         messageIds.add(messageId);
+    }
+
+    @Override
+    public String toString() {
+        return "Channel{" +
+                "channelName='" + channelName + '\'' +
+                ", userIds=" + userIds +
+                ", messageIds=" + messageIds +
+                '}' + super.toString();
     }
 }
