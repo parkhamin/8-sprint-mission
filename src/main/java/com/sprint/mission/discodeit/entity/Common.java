@@ -1,8 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 
-abstract class Common { // 공통으로 사용 -> 추상클래스로 선언
+abstract class Common implements Serializable { // 공통으로 사용 -> 추상클래스로 선언
+    @Serial
+    private static final long serialVersionUID = 1L;
     // final : 변경 불가능, 한 번 값이 할당되면 변경할 수 없음
     // private final : 객체 수준에서 불변, 한 번 값을 넣으면 다시 변경 불가능
     // 객체마다 다른데 변경은 되면 안될 때 사용

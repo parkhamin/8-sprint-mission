@@ -4,6 +4,9 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
@@ -12,9 +15,9 @@ import java.util.stream.Collectors;
 
 public class JavaApplication {
     public static void main(String[] args) {
-        UserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        JCFMessageService messageService = new JCFMessageService(userService, null);
-        JCFChannelService channelService = new JCFChannelService(messageService);
+        UserService userService = new FileUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        FileMessageService messageService = new FileMessageService(userService, null);
+        FileChannelService channelService = new FileChannelService(messageService);
         messageService.setChannelService(channelService);
 
         User user1 = new User("user1");
@@ -28,12 +31,12 @@ public class JavaApplication {
 
         userService.getAllUsers()
                 .forEach(user -> System.out.println(user.getUserName()
-                        + " 객체가 만들어진 시간: " + user.getCreatedAt()));
+                        + ", 객체가 만들어진 시간: " + user.getCreatedAt()));
 
         // 모든 회원 출력
         System.out.println("==================== 모든 사용자 조회 ====================");
         userService.getAllUsers().stream()
-                .forEach(user -> System.out.println("ID: " + user.getId() + " 이름: " + user.getUserName()));
+                .forEach(user -> System.out.println("ID: " + user.getId() + ", 이름: " + user.getUserName()));
 
         Channel channel1 = new Channel("ch01");
         Channel channel2 = new Channel("ch02");
@@ -46,11 +49,11 @@ public class JavaApplication {
 
         channelService.getAllChannels()
                 .forEach(channel -> System.out.println(channel.getChannelName()
-                        + " 객체가 만들어진 시간: " + channel.getCreatedAt()));
+                        + ", 객체가 만들어진 시간: " + channel.getCreatedAt()));
 
         System.out.println("==================== 모든 채널 조회 ====================");
         channelService.getAllChannels().stream()
-                .forEach(channel -> System.out.println("채널 ID: " + channel.getId() + " 채널 이름: " + channel.getChannelName()));
+                .forEach(channel -> System.out.println("채널 ID: " + channel.getId() + ", 채널 이름: " + channel.getChannelName()));
 
         System.out.println("==================== 사용자가 채널에 참여 ====================");
         /*
@@ -106,7 +109,7 @@ public class JavaApplication {
 
         messageService.getAllMessages()
                 .forEach(message -> System.out.println(message.getContent()
-                        + " 객체가 만들어진 시간: " + message.getCreatedAt()));
+                        + ", 객체가 만들어진 시간: " + message.getCreatedAt()));
 
         //System.out.println("========== 메시지 보냄 ==========");
         channelService.sendMessage(channel3.getId(), message1.getId());
@@ -157,32 +160,20 @@ public class JavaApplication {
         System.out.println("==================== 사용자 정보 수정 ====================");
         System.out.print("이름: " + userService.getUser(user1.getId()).getUserName());
         userService.updateUser(user1.getId(), "변경된 user1");
-        System.out.println(" -> " + userService.getUser(user1.getId()).getUserName()); // user1 특정 사용자 조회
-
-        userService.getAllUsers()
-                .forEach(user -> System.out.println(user.getUserName()
-                        + " 객체가 수정된 시간: " + user.getUpdatedAt()));
+        System.out.println(" -> " + userService.getUser(user1.getId()).getUserName() + ", 정보가 수정된 시간: " + user1.getUpdatedAt()); // user1 특정 사용자 조회
 
         System.out.println("==================== 채널 정보 수정 ====================");
         System.out.print("채널 이름: " + channelService.getChannel(channel1.getId()).getChannelName());
         channelService.updateChannel(channel1.getId(), "변경된 ch01");
-        System.out.println(" -> " + channelService.getChannel(channel1.getId()).getChannelName());
-
-        channelService.getAllChannels()
-                .forEach(channel -> System.out.println(channel.getChannelName()
-                        + " 객체가 수정된 시간: " + channel.getUpdatedAt()));
+        System.out.println(" -> " + channelService.getChannel(channel1.getId()).getChannelName() + ", 정보가 수정된 시간: " + channel1.getUpdatedAt());
 
         System.out.println("==================== 메시지 정보 수정 ====================");
         System.out.print("메시지 내용: " + messageService.getMessage(message1.getId()).getContent());
         messageService.updateMessage(message1.getId(),"user2가 ch03에서 보내는 변경된 메시지입니다.");
-        System.out.println(" -> " + messageService.getMessage(message1.getId()).getContent());
-
-        messageService.getAllMessages()
-                .forEach(message -> System.out.println(message.getContent()
-                        + " 객체가 수정된 시간: " + message.getUpdatedAt()));
+        System.out.println(" -> " + messageService.getMessage(message1.getId()).getContent() + ", 정보가 수정된 시간: " + message1.getUpdatedAt());
 
         System.out.println("==================== 메시지 삭제 후 모든 메시지 목록 ====================");
-        System.out.println("user2가 ch03에서 보내는 변경된 메시지입니다. 삭제된 것 확인");
+        System.out.println("\"user2가 ch03에서 보내는 변경된 메시지입니다.\" 삭제된 것 확인");
         messageService.deleteMessage(message1.getId());
         channelService.getAllChannels().forEach(channel -> {
             messageService.getAllMessages().stream() // 모든 메시지들이 저장된 messages의 map을 stream으로 변환
@@ -195,14 +186,14 @@ public class JavaApplication {
         System.out.println("==================== 채널 삭제 ====================");
         channelService.deleteChannel(channel1.getId());
         System.out.println("==================== 삭제 후 채널 목록 조회 ====================");
-        System.out.println("변경된 ch01 채널 삭제된 것 확인");
+        System.out.println("\"변경된 ch01\" 채널 삭제된 것 확인");
         channelService.getAllChannels().stream()
                 .forEach(channel -> System.out.println("채널 ID: " + channel.getId() + " 채널 이름: " + channel.getChannelName()));
 
         // 회원 삭제
         System.out.println("==================== 사용자 탈퇴 ====================");
         userService.deleteUser(user1.getId());
-        System.out.println("변경된 user1 삭제된 것 확인");
+        System.out.println("\"변경된 user1\" 삭제된 것 확인");
 
         // 탈퇴 후 모든 회원 출력
         userService.getAllUsers()
