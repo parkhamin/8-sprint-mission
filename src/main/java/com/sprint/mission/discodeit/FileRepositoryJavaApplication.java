@@ -39,9 +39,9 @@ public class FileRepositoryJavaApplication {
 
         // 각 service와 repository 필요함
         // service는 repository에 의존함. 즉 repository 먼저 선언해야함.
-        UserRepository userRepo = new FileUserRepository();
-        MessageRepository messageRepo = new FileMessageRepository();
-        ChannelRepository channelRepo = new FileChannelRepository();
+        UserRepository userRepo = FileUserRepository.getInstance();
+        MessageRepository messageRepo = FileMessageRepository.getInstance();
+        ChannelRepository channelRepo = FileChannelRepository.getInstance();
 
         UserService userService = new BasicUserService(userRepo);
         ChannelService channelService = new BasicChannelService(channelRepo, messageRepo);

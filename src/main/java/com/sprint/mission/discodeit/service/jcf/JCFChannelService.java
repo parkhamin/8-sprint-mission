@@ -12,8 +12,16 @@ public class JCFChannelService implements ChannelService {
     private final Map<UUID, Channel> channels = new HashMap<>();
     private final MessageService messageService;
 
-    public JCFChannelService(MessageService messageService) {
+    private JCFChannelService(MessageService messageService) {
         this.messageService = messageService;
+    }
+
+    private static class SingletonHolder {
+        private static final JCFChannelService INSTANCE = new JCFChannelService(JCFMessageService.getInstance());
+    }
+
+    public static JCFChannelService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     @Override

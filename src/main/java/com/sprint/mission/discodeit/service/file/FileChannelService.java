@@ -12,9 +12,18 @@ public class FileChannelService implements ChannelService {
     private Map<UUID, Channel> channels = new HashMap<>();
     private final MessageService messageService;
 
-    public FileChannelService(MessageService messageService) {
+    private FileChannelService(MessageService messageService) {
         this.messageService = messageService;
         load();
+    }
+
+    private static class SingletonHolder {
+        private static final FileChannelService INSTANCE =
+                new FileChannelService(FileMessageService.getInstance());
+    }
+
+    public static FileChannelService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     @Override

@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 public class JavaApplication {
     public static void main(String[] args) {
         // 1. JCF**Service 버전
-        JCFUserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        JCFMessageService messageService = new JCFMessageService(userService);
-        JCFChannelService channelService = new JCFChannelService(messageService);
+        JCFUserService userService = JCFUserService.getInstance(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        JCFMessageService messageService = JCFMessageService.getInstance();
+        JCFChannelService channelService = JCFChannelService.getInstance();
         messageService.setChannelService(channelService); // 메시지 서비스에서 채널 서비스 의존함. 필요함. (원하는 채널에 메시지 보내야함)
 
         User user1 = new User("user1");

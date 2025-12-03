@@ -9,8 +9,16 @@ import java.util.*;
 public class FileUserService implements UserService {
     private Map<UUID, User> users = new HashMap<>();
 
-    public FileUserService() {
+    private FileUserService() {
         load();
+    }
+
+    private static class SingletonHolder {
+        private static final FileUserService INSTANCE = new FileUserService();
+    }
+
+    public static FileUserService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     @Override

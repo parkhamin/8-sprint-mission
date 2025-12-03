@@ -39,9 +39,9 @@ public class JCFRepositoryJavaApplication {
 
         // 각 service와 repository 필요함
         // service는 repository에 의존함. 즉 repository 먼저 선언해야함.
-        UserRepository userRepo = new JCFUserRepository();
-        MessageRepository messageRepo = new JCFMessageRepository();
-        ChannelRepository channelRepo = new  JCFChannelRepository();
+        UserRepository userRepo = JCFUserRepository.getInstance();
+        MessageRepository messageRepo = JCFMessageRepository.getInstance();
+        ChannelRepository channelRepo = JCFChannelRepository.getInstance();
 
         UserService userService = new BasicUserService(userRepo);
         ChannelService channelService = new BasicChannelService(channelRepo, messageRepo);

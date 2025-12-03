@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 public class FileJCFJavaApplication {
     public static void main(String[] args) {
         // 2. FILE**Service 버전
-        FileUserService userService = new FileUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        FileMessageService messageService = new FileMessageService(userService);
-        FileChannelService channelService = new FileChannelService(messageService);
+        FileUserService userService = FileUserService.getInstance(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        FileMessageService messageService = FileMessageService.getInstance();
+        FileChannelService channelService = FileChannelService.getInstance();
         messageService.setChannelService(channelService);
 
         User user1 = new User("user1");

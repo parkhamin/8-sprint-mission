@@ -7,10 +7,18 @@ import java.io.*;
 import java.util.*;
 
 public class FileChannelRepository implements ChannelRepository {
+    private static class SingletonHolder{
+        private static final FileChannelRepository INSTANCE = new FileChannelRepository();
+    }
+
+    public static FileChannelRepository getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+
     private final File file = new File("channel.ser");
     private Map<UUID, Channel> channels = new HashMap<>();
 
-    public FileChannelRepository() {
+    private FileChannelRepository() {
         loadFromFile();
     }
 

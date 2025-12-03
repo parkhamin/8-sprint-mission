@@ -6,6 +6,16 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import java.util.*;
 
 public class JCFMessageRepository implements MessageRepository {
+    private JCFMessageRepository(){}
+
+    private static class SingletonHolder{
+        private static final JCFMessageRepository INSTANCE = new JCFMessageRepository();
+    }
+
+    public static JCFMessageRepository getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+
     // 메시지들의 정보를 저장할 Map
     private final Map<UUID, Message> messages = new HashMap<>();
 

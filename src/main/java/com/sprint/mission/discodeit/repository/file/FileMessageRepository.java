@@ -7,10 +7,18 @@ import java.io.*;
 import java.util.*;
 
 public class FileMessageRepository implements MessageRepository {
+    private static class SingletonHolder{
+        private static final FileMessageRepository INSTANCE = new FileMessageRepository();
+    }
+
+    public static FileMessageRepository getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+
     private final File file = new File("message.ser");
     private Map<UUID, Message> messages = new HashMap<>();
 
-    public FileMessageRepository(){
+    private FileMessageRepository(){
         loadFromFile(); // 생성될 때 기존의 데이터 불러오기(파일 -> (역직렬화) -> 객체 Map)
     }
 

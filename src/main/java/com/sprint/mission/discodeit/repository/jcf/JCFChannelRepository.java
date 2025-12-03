@@ -6,6 +6,16 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import java.util.*;
 
 public class JCFChannelRepository implements ChannelRepository {
+    private JCFChannelRepository(){}
+
+    private static class SingletonHolder{
+        private static final JCFChannelRepository INSTANCE = new JCFChannelRepository();
+    }
+
+    public static JCFChannelRepository getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+
     // 채널의 정보들을 저장할 Map
     private final Map<UUID, Channel> channels = new HashMap<>();
 

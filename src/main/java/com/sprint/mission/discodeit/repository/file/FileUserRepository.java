@@ -7,13 +7,21 @@ import java.io.*;
 import java.util.*;
 
 public class FileUserRepository implements UserRepository {
+    private static class SingletonHolder{
+        private static final FileUserRepository INSTANCE = new FileUserRepository();
+    }
+
+    public static FileUserRepository getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+
     // User의 정보들을 직렬화하여 저장할 파일
     private final File file = new File("user.ser");
 
     // User의 정보를 저장할 Map
     private Map<UUID, User> users = new HashMap<>();
 
-    public FileUserRepository(){
+    private FileUserRepository(){
         loadFromFile();
     }
 

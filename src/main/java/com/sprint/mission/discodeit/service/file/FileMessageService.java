@@ -14,9 +14,18 @@ public class FileMessageService implements MessageService {
     private final UserService userService;
     private ChannelService channelService;
 
-    public FileMessageService(UserService userService) {
+    private FileMessageService(UserService userService) {
         this.userService = userService;
         load();
+    }
+
+    private static class SingletonHolder {
+        private static final FileMessageService INSTANCE =
+                new FileMessageService(FileUserService.getInstance());
+    }
+
+    public static FileMessageService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     public void setChannelService(ChannelService channelService) {

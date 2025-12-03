@@ -14,8 +14,16 @@ public class JCFMessageService implements MessageService {
     private final UserService userService;
     private ChannelService channelService;
 
-    public JCFMessageService(UserService userService) {
+    private JCFMessageService(UserService userService) {
         this.userService = userService;
+    }
+
+    private static class SingletonHolder {
+        private static final JCFMessageService INSTANCE = new JCFMessageService(JCFUserService.getInstance());
+    }
+
+    public static JCFMessageService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     public void setChannelService(ChannelService channelService) {
