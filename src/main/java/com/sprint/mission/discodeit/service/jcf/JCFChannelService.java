@@ -50,11 +50,24 @@ public class JCFChannelService implements ChannelService {
         if (message == null) throw new IllegalArgumentException("보내려는 메시지가 존재하지 않습니다.");
         if (!channel.getUsers().contains(message.getSender())) throw new IllegalArgumentException("보내려는 사용자가 존재하지 않습니다.");
         channel.addMessage(messageId);
-
     }
 
     @Override
     public List<Channel> getAllChannels() {
         return new ArrayList<>(channels.values());
+    }
+
+    @Override
+    public void addUserToChannel(UUID channelId, UUID userId) {
+        Channel channel = channels.get(channelId);
+        if (channel == null) throw new IllegalArgumentException("존재하지 않는 채널입니다.");
+        channel.addUser(userId);
+    }
+
+    @Override
+    public void removeUserFromChannel(UUID channelId, UUID userId) {
+        Channel channel = channels.get(channelId);
+        if (channel == null) throw new IllegalArgumentException("존재하지 않는 채널입니다.");
+        channel.removeUser(userId);
     }
 }

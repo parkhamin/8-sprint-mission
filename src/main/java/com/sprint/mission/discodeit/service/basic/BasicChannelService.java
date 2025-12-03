@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class BasicChannelService implements ChannelService {
-    ChannelRepository channelRepository; // 필요한 repository 필드로 선언
-    MessageRepository messageRepository;
+    private final ChannelRepository channelRepository; // 필요한 repository 필드로 선언
+    private final MessageRepository messageRepository;
 
     public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository) {
         this.channelRepository = channelRepository; // 생성자로 초기화
@@ -61,5 +61,19 @@ public class BasicChannelService implements ChannelService {
     @Override
     public List<Channel> getAllChannels() {
         return channelRepository.findAll();
+    }
+
+    @Override
+    public void addUserToChannel(UUID channelId, UUID userId) {
+        Channel channel = getChannel(channelId);
+        channel.addUser(userId);
+        channelRepository.save(channel); // 변경 반영
+    }
+
+    @Override
+    public void removeUserFromChannel(UUID channelId, UUID userId) {
+        Channel channel = getChannel(channelId);
+        channel.removeUser(userId);
+        channelRepository.save(channel); // 변경 반영
     }
 }

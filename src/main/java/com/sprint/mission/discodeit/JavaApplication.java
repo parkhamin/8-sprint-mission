@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
@@ -13,10 +12,10 @@ import java.util.stream.Collectors;
 public class JavaApplication {
     public static void main(String[] args) {
         // 1. JCF**Service 버전
-        UserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        JCFMessageService messageService = new JCFMessageService(userService, null);
+        JCFUserService userService = new JCFUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        JCFMessageService messageService = new JCFMessageService(userService);
         JCFChannelService channelService = new JCFChannelService(messageService);
-        messageService.setChannelService(channelService);
+        messageService.setChannelService(channelService); // 메시지 서비스에서 채널 서비스 의존함. 필요함. (원하는 채널에 메시지 보내야함)
 
         User user1 = new User("user1");
         User user2 = new User("user2");
@@ -58,14 +57,14 @@ public class JavaApplication {
         채널 1              채널 2          채널 3
         사용자 1, 2, 3     사용자 2        사용자 2, 3
          */
-        channel1.addUser(user1.getId()); // 사용자 1이 채널 1에 참여
-        channel1.addUser(user2.getId());
-        channel1.addUser(user3.getId());
+        channelService.addUserToChannel(channel1.getId(), user1.getId());
+        channelService.addUserToChannel(channel1.getId(), user2.getId());
+        channelService.addUserToChannel(channel1.getId(), user3.getId());
 
-        channel2.addUser(user2.getId());
+        channelService.addUserToChannel(channel2.getId(), user2.getId());
 
-        channel3.addUser(user2.getId());
-        channel3.addUser(user3.getId());
+        channelService.addUserToChannel(channel3.getId(), user2.getId());
+        channelService.addUserToChannel(channel3.getId(), user3.getId());
 
         System.out.println("==================== 채널에 참여한 사용자 목록 ====================");
         /*String userNames1 = channel1.getUsers().stream() // 채널 1 에 참여한 모든 사용자들의 목록 (set) 을 받아서 stream으로 변환
@@ -149,7 +148,7 @@ public class JavaApplication {
         // 사용자가 채널에서 나감
         System.out.println("==================== 사용자가 채널에서 나감 ====================");
         System.out.println("==================== 채널에 남아있는 사람 목록 ====================");
-        channel1.removeUser(user1.getId());
+        channelService.removeUserFromChannel(channel1.getId(), user1.getId());
         String userNames = channel1.getUsers().stream() // 채널 1 에 참여한 모든 사용자들의 목록 (set) 을 받아서 stream으로 변환
                 .map(id -> userService.getUser(id).getUserName()) // id 값을 받아서 User 객체의 사용자 이름 필드에 접근
                 .collect(Collectors.joining(", "));

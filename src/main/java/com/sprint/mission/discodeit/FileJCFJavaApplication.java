@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
 import com.sprint.mission.discodeit.service.file.FileUserService;
@@ -13,8 +12,8 @@ import java.util.stream.Collectors;
 public class FileJCFJavaApplication {
     public static void main(String[] args) {
         // 2. FILE**Service 버전
-        UserService userService = new FileUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
-        FileMessageService messageService = new FileMessageService(userService, null);
+        FileUserService userService = new FileUserService(); // 인터페이스 타입으로 구현체를 받아서 사용한다는 의미
+        FileMessageService messageService = new FileMessageService(userService);
         FileChannelService channelService = new FileChannelService(messageService);
         messageService.setChannelService(channelService);
 
@@ -58,14 +57,14 @@ public class FileJCFJavaApplication {
         채널 1              채널 2          채널 3
         사용자 1, 2, 3     사용자 2        사용자 2, 3
          */
-        channel1.addUser(user1.getId()); // 사용자 1이 채널 1에 참여
-        channel1.addUser(user2.getId());
-        channel1.addUser(user3.getId());
+        channelService.addUserToChannel(channel1.getId(), user1.getId());
+        channelService.addUserToChannel(channel1.getId(), user2.getId());
+        channelService.addUserToChannel(channel1.getId(), user3.getId());
 
-        channel2.addUser(user2.getId());
+        channelService.addUserToChannel(channel2.getId(), user2.getId());
 
-        channel3.addUser(user2.getId());
-        channel3.addUser(user3.getId());
+        channelService.addUserToChannel(channel3.getId(), user2.getId());
+        channelService.addUserToChannel(channel3.getId(), user3.getId());
 
         System.out.println("==================== 채널에 참여한 사용자 목록 ====================");
         /*String userNames1 = channel1.getUsers().stream() // 채널 1 에 참여한 모든 사용자들의 목록 (set) 을 받아서 stream으로 변환
@@ -149,7 +148,7 @@ public class FileJCFJavaApplication {
         // 사용자가 채널에서 나감
         System.out.println("==================== 사용자가 채널에서 나감 ====================");
         System.out.println("==================== 채널에 남아있는 사람 목록 ====================");
-        channel1.removeUser(user1.getId());
+        channelService.removeUserFromChannel(channel1.getId(), user1.getId());
         String userNames = channel1.getUsers().stream() // 채널 1 에 참여한 모든 사용자들의 목록 (set) 을 받아서 stream으로 변환
                 .map(id -> userService.getUser(id).getUserName()) // id 값을 받아서 User 객체의 사용자 이름 필드에 접근
                 .collect(Collectors.joining(", "));

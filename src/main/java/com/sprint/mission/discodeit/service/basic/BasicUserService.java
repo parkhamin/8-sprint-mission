@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class BasicUserService implements UserService {
-    private UserRepository userRepository; // user를 저장할 레포지토리
+    private final UserRepository userRepository; // user를 저장할 레포지토리
 
     public BasicUserService(UserRepository userRepository) {
         this.userRepository = userRepository;

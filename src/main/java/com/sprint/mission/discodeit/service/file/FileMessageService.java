@@ -14,9 +14,8 @@ public class FileMessageService implements MessageService {
     private final UserService userService;
     private ChannelService channelService;
 
-    public FileMessageService(UserService userService, ChannelService channelService) {
+    public FileMessageService(UserService userService) {
         this.userService = userService;
-        this.channelService = channelService;
         load();
     }
 
@@ -31,7 +30,7 @@ public class FileMessageService implements MessageService {
         if (channel == null)
             throw new IllegalArgumentException("채널이 존재하지 않습니다.");
         if (!channel.getUsers().contains(message.getSender()))
-            throw new IllegalArgumentException("보내려는 사용자가 채널에 참가하지 않습니다.");
+            throw new IllegalArgumentException("메시지를 보내려는 사용자가 채널에 참가하지 않았습니다.");
 
         messages.put(message.getId(), message);
         save();
