@@ -8,12 +8,13 @@ public class Message extends Common implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     private String content; // 메시지의 내용
-    private final UUID sender; // 메시지 발신자
+    private final UUID senderId; // 메시지 발신자
     private final UUID channelId; // 메시지를 보내는 채널의 번호
 
-    public Message(String content, UUID sender, UUID channelId) {
+    public Message(String content, UUID senderId, UUID channelId) {
+        super();
         this.content = content;
-        this.sender = sender;
+        this.senderId = senderId;
         this.channelId = channelId;
     }
 
@@ -26,8 +27,8 @@ public class Message extends Common implements Serializable {
         update();
     }
 
-    public UUID getSender() {
-        return sender;
+    public UUID getSenderId() {
+        return senderId;
     }
 
     public UUID getChannelId() {
@@ -36,10 +37,10 @@ public class Message extends Common implements Serializable {
 
     @Override
     public String toString() {
-        return "Message{" +
+        return "Message {" +
                 "content='" + content + '\'' +
-                ", sender=" + sender +
+                ", senderId=" + senderId +
                 ", channelId=" + channelId +
-                '}' + super.toString();
+                '}' + " , " +super.toString();
     }
 }

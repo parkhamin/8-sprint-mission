@@ -12,54 +12,45 @@ public class JCFMessageService implements MessageService {
     // 메시지의 ID와 메시지 객체를 담을 객체 hash map 생성
     private final Map<UUID, Message> messages = new HashMap<>();
     private final UserService userService;
-    private ChannelService channelService;
+    private final ChannelService channelService;
 
-    private JCFMessageService(UserService userService) {
+    public JCFMessageService(UserService userService, ChannelService channelService) {
         this.userService = userService;
-    }
-
-    private static class SingletonHolder {
-        private static final JCFMessageService INSTANCE = new JCFMessageService(JCFUserService.getInstance());
-    }
-
-    public static JCFMessageService getInstance() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    public void setChannelService(ChannelService channelService) {
         this.channelService = channelService;
     }
 
     @Override
-    public Message createMessage(Message message) {
-        if (userService.getUser(message.getSender()) == null) throw new IllegalArgumentException("보내려는 사용자가 존재하지 않습니다.");
-        Channel channel = channelService.getChannel(message.getChannelId());
-        if (channel == null)
-            throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-        if (!channel.getUsers().contains(message.getSender()))
-            throw new IllegalArgumentException("메시지를 보내려는 사용자가 채널에 참가하지 않았습니다.");
+    public Message createMessage(String messageContent, UUID userId, UUID channelId) {
+        if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
 
+        Message message = new Message(messageContent, userId, channelId);
         messages.put(message.getId(), message);
-        channel.addMessage(message.getId());
-        return message;
+        return  message;
     }
 
     @Override
     public Message getMessage(UUID messageId) {
-        return messages.get(messageId);
+        Message message = messages.get(messageId);
+
+        if (message == null) throw new IllegalArgumentException("메시지가 존재하지 않습니다.");
+        return message;
     }
 
     @Override
-    public void updateMessage(UUID messageId, String newContent) {
+    public Message updateMessage(UUID messageId, String newContent) {
         Message message = messages.get(messageId);
 
-        if (message != null) {
-            message.updateContent(newContent);
-        }
+        if (message == null) throw new IllegalArgumentException("메시지가 존재하지 않습니다.");
+        message.updateContent(newContent);
+        return message;
     }
 
     @Override
     public void deleteMessage(UUID messageId) {
+        Message message = messages.get(messageId);
+
+        if (message == null) throw new IllegalArgumentException("메시지가 존재하지 않습니다.");
         messages.remove(messageId);
     }
 
