@@ -1,61 +1,49 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class BasicChannelService implements ChannelService {
-    private final ChannelRepository channelRepository; // 필요한 repository 필드로 선언
-    private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
+    private final ChannelRepository channelRepository;
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository) {
-        this.channelRepository = channelRepository; // 생성자로 초기화
-        this.messageRepository = messageRepository;
+    public BasicChannelService(UserRepository userRepository, ChannelRepository channelRepository) {
+        this.userRepository = userRepository;
+        this.channelRepository = channelRepository;
     }
 
     @Override
-    public Channel createChannel(Channel channel) {
+    public Channel createChannel(String channelName) {
+        Channel channel = new Channel(channelName);
         return channelRepository.save(channel);
     }
 
     @Override
     public Channel getChannel(UUID channelId) {
-        Channel channel = channelRepository.findById(channelId);
-
-        if (channel == null) {
-            throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        }
-        return channel;
+        return channelRepository.findById(channelId)
+                .orElseThrow(() -> new NoSuchElementException("채널이 존재하지 않습니다."));
     }
 
     @Override
-    public void updateChannel(UUID channelId, String newChannelName) {
-        Channel channel = getChannel(channelId);
+    public Channel updateChannel(UUID channelId, String newChannelName) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new NoSuchElementException("채널이 존재하지 않습니다."));
         channel.updateChannelName(newChannelName);
-        channelRepository.save(channel);
+        return channelRepository.save(channel);
     }
 
     @Override
     public void deleteChannel(UUID channelId) {
-        Channel channel = getChannel(channelId);
-        channelRepository.deleteById(channel.getId());
-    }
-
-    @Override
-    public void sendMessage(UUID channelId, UUID messageId) {
-        Channel channel = getChannel(channelId);
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-
-        Message message = messageRepository.findById(messageId);
-        if (message == null) throw new IllegalArgumentException("보내려는 메시지가 존재하지 않습니다.");
-        if (!channel.getUsers().contains(message.getSender())) throw new IllegalArgumentException("보내려는 사용자가 존재하지 않습니다.");
-        channel.addMessage(messageId); // addMessage를 통해서 채널의 List에 messageId 추가
-        channelRepository.save(channel); // List 변경된 것 반영해서 save하기
+        channelRepository.findById(channelId)
+                .orElseThrow(() -> new IllegalArgumentException("채널이 존재하지 않습니다."));
+        channelRepository.deleteById(channelId);
     }
 
     @Override
@@ -64,16 +52,20 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public void addUserToChannel(UUID channelId, UUID userId) {
-        Channel channel = getChannel(channelId);
+    public void addUserToChannel(UUID userId, UUID channelId) {
+        userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+
+        Channel channel = getChannel(channelId); // 값이 null이었다면 getChannel 메서드를 통해 이미 오류가 났을 것.
         channel.addUser(userId);
-        channelRepository.save(channel); // 변경 반영
+        channelRepository.save(channel);
     }
 
     @Override
-    public void removeUserFromChannel(UUID channelId, UUID userId) {
-        Channel channel = getChannel(channelId);
+    public void removeUserFromChannel(UUID userId, UUID channelId) {
+        userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+        Channel channel = getChannel(channelId); // 값이 null이었다면 getChannel 메서드를 통해 이미 오류가 났을 것.
+
         channel.removeUser(userId);
-        channelRepository.save(channel); // 변경 반영
+        channelRepository.save(channel);
     }
 }

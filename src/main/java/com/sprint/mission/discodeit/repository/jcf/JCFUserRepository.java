@@ -6,7 +6,11 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.*;
 
 public class JCFUserRepository implements UserRepository {
-    private JCFUserRepository(){}
+    private final Map<UUID, User> users;
+
+    private JCFUserRepository(){
+        this.users = new HashMap<>();
+    }
 
     private static class SingletonHolder{
         private static final JCFUserRepository INSTANCE = new JCFUserRepository();
@@ -16,27 +20,25 @@ public class JCFUserRepository implements UserRepository {
         return SingletonHolder.INSTANCE;
     }
 
-    // User 정보를 저장할 Map
-    private final Map<UUID, User> users = new HashMap<>();
 
     @Override
     public User save(User user) {
-        users.put(user.getId(), user);
+        this.users.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public User findById(UUID userId) {
-        return users.get(userId);
+    public Optional<User> findById(UUID id) {
+        return Optional.ofNullable(this.users.get(id));
     }
 
     @Override
-    public void deleteById(UUID userId) {
-        users.remove(userId);
+    public void deleteById(UUID id) {
+        this.users.remove(id);
     }
 
     @Override
     public List<User> findAll() {
-        return new ArrayList<>(users.values());
+        return (List<User>) this.users.values();
     }
 }

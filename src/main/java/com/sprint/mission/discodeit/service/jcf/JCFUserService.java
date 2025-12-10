@@ -9,7 +9,15 @@ public class JCFUserService implements UserService {
     // 사용자의 ID와 사용자의 정보를 담은 사용자 객체를 쌍으로 데이터를 저장하기 위해 Hash map 사용
     private final Map<UUID, User> users = new HashMap<>();
 
-    public JCFUserService() {}
+    private JCFUserService() {}
+
+    private static class SingletonHolder {
+        private static final JCFUserService INSTANCE = new JCFUserService();
+    }
+
+    public static JCFUserService getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 
     @Override
     public User createUser(String userName) {

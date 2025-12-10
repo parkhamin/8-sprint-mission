@@ -5,40 +5,42 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class BasicUserService implements UserService {
-    private final UserRepository userRepository; // user를 저장할 레포지토리
+    private final UserRepository userRepository;
 
     public BasicUserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public User createUser(User user) {
+    public User createUser(String userName) {
+        User user = new User(userName);
         return userRepository.save(user);
     }
 
     @Override
     public User getUser(UUID userId) {
-        User user = userRepository.findById(userId);
-
-        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        return user;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
     }
 
     @Override
-    public void updateUser(UUID userId, String newUserName) {
-        User user = getUser(userId); // 없는 사용자면 이미 getUser에서 오류가 떴을 것! 즉, 이 메소드에서는 항상 user가 null이 아님// user.updateUserName(newUserName);
+    public User updateUser(UUID userId, String newUserName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
         user.updateUserName(newUserName);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
     public void deleteUser(UUID userId) {
-        //User user = userRepository.findById(userId);
-        User user = getUser(userId);
-        userRepository.deleteById(user.getId());
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        userRepository.deleteById(userId);
     }
 
     @Override

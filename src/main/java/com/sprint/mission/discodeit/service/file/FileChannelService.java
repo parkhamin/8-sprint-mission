@@ -1,112 +1,183 @@
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.UserService;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class FileChannelService implements ChannelService {
-    private Map<UUID, Channel> channels = new HashMap<>();
-    private final MessageService messageService;
+    private final Path DIRECTORY;
+    private final String EXTENSION = ".ser";
 
-    private FileChannelService(MessageService messageService) {
-        this.messageService = messageService;
-        load();
+    private final UserService userService;
+
+    private FileChannelService(UserService userService) {
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Channel.class.getSimpleName());
+        if (Files.notExists(DIRECTORY)) {
+            try {
+                Files.createDirectories(DIRECTORY);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        this.userService = userService;
     }
 
     private static class SingletonHolder {
-        private static final FileChannelService INSTANCE =
-                new FileChannelService(FileMessageService.getInstance());
+        private static final FileChannelService INSTANCE = new FileChannelService(FileUserService.getInstance());
     }
 
     public static FileChannelService getInstance() {
-        return SingletonHolder.INSTANCE;
+        return FileChannelService.SingletonHolder.INSTANCE;
+    }
+
+    private Path resolvePath(UUID id) {
+        return DIRECTORY.resolve(id + EXTENSION);
     }
 
     @Override
-    public Channel createChannel(Channel channel) {
-        channels.put(channel.getId(), channel);
-        save();
+    public Channel createChannel(String channelName) {
+        Channel channel = new Channel(channelName);
+        Path path = resolvePath(channel.getId());
+        try (
+                FileOutputStream fos = new FileOutputStream(path.toFile());
+                ObjectOutputStream oos = new ObjectOutputStream(fos)
+        ) {
+            oos.writeObject(channel);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return channel;
     }
 
     @Override
     public Channel getChannel(UUID channelId) {
-        return channels.get(channelId);
+        Channel channelNullable = null;
+        Path path = resolvePath(channelId);
+        if (Files.exists(path)) {
+            try (
+                    FileInputStream fis = new FileInputStream(path.toFile());
+                    ObjectInputStream ois = new ObjectInputStream(fis)
+            ) {
+                channelNullable = (Channel) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return Optional.ofNullable(channelNullable)
+                .orElseThrow(() -> new NoSuchElementException("채널을 찾을 수 없습니다."));
     }
 
     @Override
-    public void updateChannel(UUID channelId, String newChannelName) {
-        Channel channel = channels.get(channelId);
-
-        if (channel != null) {
-            channel.updateChannelName(newChannelName);
-            save();
+    public Channel updateChannel(UUID channelId, String newChannelName) {
+        Channel channelNullable = null;
+        Path path = resolvePath(channelId);
+        if (Files.exists(path)) {
+            try (
+                    FileInputStream fis = new FileInputStream(path.toFile());
+                    ObjectInputStream ois = new ObjectInputStream(fis)
+            ) {
+                channelNullable = (Channel) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
+
+        Channel channel = Optional.ofNullable(channelNullable)
+                .orElseThrow(() -> new NoSuchElementException("채널을 찾을 수 없습니다."));
+        channel.updateChannelName(newChannelName);
+
+        try(
+                FileOutputStream fos = new FileOutputStream(path.toFile());
+                ObjectOutputStream oos = new ObjectOutputStream(fos)
+        ) {
+            oos.writeObject(channel);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return channel;
     }
 
     @Override
     public void deleteChannel(UUID channelId) {
-        channels.remove(channelId);
-        save();
-    }
-
-    @Override
-    public void sendMessage(UUID channelId, UUID messageId) {
-        Channel channel = channels.get(channelId);
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-
-        Message message = messageService.getMessage(messageId);
-        if (message == null) throw new IllegalArgumentException("보내려는 메시지가 존재하지 않습니다.");
-        if (!channel.getUsers().contains(message.getSender())) throw new IllegalArgumentException("보내려는 사용자가 존재하지 않습니다.");
-        channel.addMessage(messageId);
-        save();
+        Path path = resolvePath(channelId);
+        if (Files.notExists(path)) {
+            throw new NoSuchElementException("채널이 존재하지 않습니다.");
+        }
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<Channel> getAllChannels() {
-        return new ArrayList<>(channels.values());
-    }
-
-    @Override
-    public void addUserToChannel(UUID channelId, UUID userId) {
-        Channel channel = channels.get(channelId);
-        if (channel == null) throw new IllegalArgumentException("존재하지 않는 채널입니다.");
-        channel.addUser(userId);
-        save();
-    }
-
-    @Override
-    public void removeUserFromChannel(UUID channelId, UUID userId) {
-        Channel channel = channels.get(channelId);
-        if (channel == null) throw new IllegalArgumentException("존재하지 않는 채널입니다.");
-
-        channel.removeUser(userId);
-        save();
-    }
-
-    private void save() {
-        try (FileOutputStream fos = new FileOutputStream("channel.ser");
-             ObjectOutputStream oos = new ObjectOutputStream(fos);
-        ) {
-            oos.writeObject(channels);
-        } catch (Exception e) {
-            e.printStackTrace();
+        try {
+            return Files.list(DIRECTORY)
+                    .filter(path -> path.toString().endsWith(EXTENSION))
+                    .map(path -> {
+                        try (
+                                FileInputStream fis = new FileInputStream(path.toFile());
+                                ObjectInputStream ois = new ObjectInputStream(fis)
+                        ) {
+                            return (Channel) ois.readObject();
+                        } catch (IOException | ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private void load() {
-        File file = new File("channel.ser");
-        if (!file.exists()) return;
+    @Override
+    public void addUserToChannel(UUID userId, UUID channelId) {
+        Channel channel = getChannel(channelId);
+        User user = userService.getUser(userId);
 
-        try (FileInputStream fis = new FileInputStream("channel.ser");
-             ObjectInputStream ois = new ObjectInputStream(fis)) {
-            channels = (Map<UUID, Channel>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+
+        channel.addUser(userId);
+        Path path = resolvePath(channel.getId());
+        try (
+                FileOutputStream fos = new FileOutputStream(path.toFile());
+                ObjectOutputStream oos = new ObjectOutputStream(fos)
+        ) {
+            oos.writeObject(channel);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void removeUserFromChannel(UUID userId, UUID channelId) {
+        Channel channel = getChannel(channelId);
+        User user = userService.getUser(userId);
+
+        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+
+        channel.removeUser(userId);
+
+        Path path = resolvePath(channel.getId());
+        try (
+                FileOutputStream fos = new FileOutputStream(path.toFile());
+                ObjectOutputStream oos = new ObjectOutputStream(fos)
+        ) {
+            oos.writeObject(channel);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

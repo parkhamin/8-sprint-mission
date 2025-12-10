@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.service.jcf;
 
-import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -14,16 +13,26 @@ public class JCFMessageService implements MessageService {
     private final UserService userService;
     private final ChannelService channelService;
 
-    public JCFMessageService(UserService userService, ChannelService channelService) {
+    private JCFMessageService(UserService userService, ChannelService channelService) {
         this.userService = userService;
         this.channelService = channelService;
+    }
+
+    private static class SingletonHolder {
+        private static final JCFMessageService INSTANCE  =  new JCFMessageService(JCFUserService.getInstance(), JCFChannelService.getInstance());
+    }
+
+    public static JCFMessageService getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     @Override
     public Message createMessage(String messageContent, UUID userId, UUID channelId) {
         if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
         if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-
+        if(!channelService.getChannel(channelId).getUsers().contains(userId)){
+            throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
+        }
         Message message = new Message(messageContent, userId, channelId);
         messages.put(message.getId(), message);
         return  message;

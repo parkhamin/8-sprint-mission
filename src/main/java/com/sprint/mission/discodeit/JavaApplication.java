@@ -6,15 +6,26 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 
+import java.util.stream.Collectors;
+
 public class JavaApplication {
     public static void main(String[] args) {
-        UserService userService = new JCFUserService();
-        ChannelService channelService = new JCFChannelService();
-        MessageService messageService = new JCFMessageService(userService, channelService);
+        /*// 1. JCF**Service 테스트 버전
+        UserService userService = JCFUserService.getInstance();
+        ChannelService channelService = JCFChannelService.getInstance();
+        MessageService messageService = JCFMessageService.getInstance();*/
+
+        // 2. File**Service 테스트 버전
+        UserService userService = FileUserService.getInstance();
+        ChannelService channelService = FileChannelService.getInstance();
+        MessageService messageService = FileMessageService.getInstance();
 
         System.out.println("사용자 CRUD 테스트");
         System.out.println("사용자 생성");
@@ -61,6 +72,19 @@ public class JavaApplication {
         channelService.getAllChannels().stream().forEach(System.out::println);
 
         System.out.println("메시지 CRUD 테스트");
+        System.out.println("사용자가 채널에 참가");
+
+        channelService.addUserToChannel(user2.getId(), channel2.getId()); // user2가 ch02에 참여
+        channelService.addUserToChannel(user2.getId(), channel3.getId()); // user2가 ch03에 참여
+        channelService.addUserToChannel(user3.getId(), channel3.getId()); // user3가 ch03에 참여
+
+        System.out.println("ch03 채널에 참여한 사용자 출력");
+        Channel channel = channelService.getChannel(channel3.getId());
+        String userNames3 = channel.getUsers().stream() // 채널 3 에 참여한 모든 사용자들의 목록 (set) 을 받아서 stream으로 변환
+                .map(id -> userService.getUser(id).getUserName()) // id 값을 받아서 User 객체의 사용자 이름 필드에 접근
+                .collect(Collectors.joining(", "));
+        System.out.println("[" + channel3.getChannelName() + "] " + userNames3);
+
         System.out.println("메시지 생성");
         Message message1 = messageService.createMessage("안녕하세요!", user2.getId(), channel2.getId());
         Message message2 = messageService.createMessage("메시지 CRUD 테스트 중입니다!", user2.getId(), channel3.getId());

@@ -6,7 +6,11 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import java.util.*;
 
 public class JCFChannelRepository implements ChannelRepository {
-    private JCFChannelRepository(){}
+    private final Map<UUID, Channel> channels;
+
+    private JCFChannelRepository(){
+        this.channels = new HashMap<>();
+    }
 
     private static class SingletonHolder{
         private static final JCFChannelRepository INSTANCE = new JCFChannelRepository();
@@ -16,27 +20,24 @@ public class JCFChannelRepository implements ChannelRepository {
         return SingletonHolder.INSTANCE;
     }
 
-    // 채널의 정보들을 저장할 Map
-    private final Map<UUID, Channel> channels = new HashMap<>();
-
     @Override
     public Channel save(Channel channel) {
-        channels.put(channel.getId(), channel);
+        this.channels.put(channel.getId(), channel);
         return channel;
     }
 
     @Override
-    public Channel findById(UUID channelId) {
-        return channels.get(channelId);
+    public Optional<Channel> findById(UUID id) {
+        return Optional.ofNullable(this.channels.get(id));
     }
 
     @Override
-    public void deleteById(UUID channelId) {
-        channels.remove(channelId);
+    public void deleteById(UUID id) {
+        this.channels.remove(id);
     }
 
     @Override
     public List<Channel> findAll() {
-        return new ArrayList<>(channels.values());
+        return (List<Channel>) this.channels.values();
     }
 }
