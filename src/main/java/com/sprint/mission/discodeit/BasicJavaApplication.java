@@ -31,7 +31,7 @@ public class BasicJavaApplication {
     }
 
     static Message messageCreateTest(MessageService messageService, Channel channel, User sender){
-        Message message = messageService.createMessage("Hello! JCF*Repository Test!", sender.getId(), channel.getId());
+        Message message = messageService.createMessage("Hello!", sender.getId(), channel.getId());
         System.out.println("메시지 생성: " + message.getId());
         System.out.println("[" + channel.getChannelName() + "] " + message.getContent());
         return message;
