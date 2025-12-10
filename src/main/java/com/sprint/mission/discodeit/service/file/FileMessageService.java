@@ -45,8 +45,8 @@ public class FileMessageService implements MessageService {
 
     @Override
     public Message createMessage(String messageContent, UUID userId, UUID channelId) {
-        if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
-        if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
         if(!channelService.getChannel(channelId).getUsers().contains(userId)){
             throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
         }
@@ -81,7 +81,7 @@ public class FileMessageService implements MessageService {
         }
 
         return Optional.ofNullable(messageNullable)
-                .orElseThrow(() -> new NoSuchElementException("메시지가 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class FileMessageService implements MessageService {
         }
 
         Message message = Optional.ofNullable(messageNullable)
-                .orElseThrow(() -> new NoSuchElementException("메시지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
         message.updateContent(newContent);
 
         return message;
@@ -110,7 +110,7 @@ public class FileMessageService implements MessageService {
     public void deleteMessage(UUID messageId) {
         Path path = resolvePath(messageId);
         if (Files.notExists(path)) {
-            throw new NoSuchElementException("메시지를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
         }
         try {
             Files.delete(path);

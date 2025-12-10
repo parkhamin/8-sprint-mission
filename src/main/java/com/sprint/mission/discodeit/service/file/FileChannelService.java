@@ -72,7 +72,7 @@ public class FileChannelService implements ChannelService {
         }
 
         return Optional.ofNullable(channelNullable)
-                .orElseThrow(() -> new NoSuchElementException("채널을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class FileChannelService implements ChannelService {
         }
 
         Channel channel = Optional.ofNullable(channelNullable)
-                .orElseThrow(() -> new NoSuchElementException("채널을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
         channel.updateChannelName(newChannelName);
 
         try(
@@ -110,7 +110,7 @@ public class FileChannelService implements ChannelService {
     public void deleteChannel(UUID channelId) {
         Path path = resolvePath(channelId);
         if (Files.notExists(path)) {
-            throw new NoSuchElementException("채널이 존재하지 않습니다.");
+            throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
         }
         try {
             Files.delete(path);
@@ -145,8 +145,8 @@ public class FileChannelService implements ChannelService {
         Channel channel = getChannel(channelId);
         User user = userService.getUser(userId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
 
         channel.addUser(userId);
         Path path = resolvePath(channel.getId());
@@ -165,8 +165,8 @@ public class FileChannelService implements ChannelService {
         Channel channel = getChannel(channelId);
         User user = userService.getUser(userId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
 
         channel.removeUser(userId);
 

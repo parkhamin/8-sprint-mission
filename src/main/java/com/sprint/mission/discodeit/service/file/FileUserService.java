@@ -67,7 +67,7 @@ public class FileUserService implements UserService {
         }
 
         return Optional.ofNullable(userNullable)
-                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class FileUserService implements UserService {
         }
 
         User user = Optional.ofNullable(userNullable)
-                .orElseThrow(() -> new NoSuchElementException("User with id " + userId + " not found"));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         user.updateUserName(newUserName);
 
         try(
@@ -105,7 +105,7 @@ public class FileUserService implements UserService {
     public void deleteUser(UUID userId) {
         Path path = resolvePath(userId);
         if (Files.notExists(path)) {
-            throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
         try {
             Files.delete(path);

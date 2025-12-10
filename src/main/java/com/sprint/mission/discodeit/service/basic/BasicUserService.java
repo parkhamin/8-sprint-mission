@@ -24,13 +24,13 @@ public class BasicUserService implements UserService {
     @Override
     public User getUser(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
     @Override
     public User updateUser(UUID userId, String newUserName) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         user.updateUserName(newUserName);
         return userRepository.save(user);
     }
@@ -38,7 +38,7 @@ public class BasicUserService implements UserService {
     @Override
     public void deleteUser(UUID userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         userRepository.deleteById(userId);
     }

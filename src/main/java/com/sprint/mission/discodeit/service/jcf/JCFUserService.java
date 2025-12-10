@@ -30,7 +30,7 @@ public class JCFUserService implements UserService {
     public User getUser(UUID userId) {
         User user = users.get(userId);
 
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         return user;
     }
 
@@ -38,7 +38,7 @@ public class JCFUserService implements UserService {
     public User updateUser(UUID userId, String newUserName) {
         User user = users.get(userId);
 
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         user.updateUserName(newUserName);
 
         return user;
@@ -46,7 +46,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public void deleteUser(UUID userId) {
-        if (!users.containsKey(userId)) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (!users.containsKey(userId)) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         users.remove(userId);
     }
 

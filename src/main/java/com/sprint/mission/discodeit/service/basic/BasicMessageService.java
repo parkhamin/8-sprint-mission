@@ -25,10 +25,10 @@ public class BasicMessageService implements MessageService{
     @Override
     public Message createMessage(String messageContent, UUID userId, UUID channelId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new IllegalArgumentException("채널이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
 
         if (!channel.getUsers().contains(user.getId())) throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
 
@@ -39,13 +39,13 @@ public class BasicMessageService implements MessageService{
     @Override
     public Message getMessage(UUID messageId) {
         return messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
     }
 
     @Override
     public Message updateMessage(UUID messageId, String newContent) {
         Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
 
         message.updateContent(newContent);
         return messageRepository.save(message);
@@ -54,7 +54,7 @@ public class BasicMessageService implements MessageService{
     @Override
     public void deleteMessage(UUID messageId) {
         messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
 
         messageRepository.deleteById(messageId);
     }

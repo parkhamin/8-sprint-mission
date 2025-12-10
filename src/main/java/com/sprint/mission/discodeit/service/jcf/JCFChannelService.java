@@ -35,7 +35,7 @@ public class JCFChannelService implements ChannelService {
     public Channel getChannel(UUID channelId) {
         Channel channel = channels.get(channelId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
         return channel;
     }
 
@@ -43,7 +43,7 @@ public class JCFChannelService implements ChannelService {
     public Channel updateChannel(UUID channelId, String newChannelName) {
         Channel channel = channels.get(channelId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
         channel.updateChannelName(newChannelName);
 
         return channel;
@@ -51,7 +51,7 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void deleteChannel(UUID channelId) {
-        if (!channels.containsKey(channelId)) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
+        if (!channels.containsKey(channelId)) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
         channels.remove(channelId);
     }
 
@@ -65,8 +65,8 @@ public class JCFChannelService implements ChannelService {
         Channel channel = channels.get(channelId);
         User user = userService.getUser(userId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
 
         channel.addUser(userId);
     }
@@ -76,8 +76,8 @@ public class JCFChannelService implements ChannelService {
         Channel channel = channels.get(channelId);
         User user = userService.getUser(userId);
 
-        if (channel == null) throw new IllegalArgumentException("채널이 존재하지 않습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
+        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
+        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
 
         channel.removeUser(userId);
     }
