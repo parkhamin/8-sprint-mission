@@ -37,8 +37,8 @@ public class FileUserService implements UserService {
     }
 
     @Override
-    public User createUser(String userName) {
-        User user = new User(userName);
+    public User createUser(String userName, String email, String password) {
+        User user = new User(userName, email, password);
         Path path = resolvePath(user.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -71,7 +71,7 @@ public class FileUserService implements UserService {
     }
 
     @Override
-    public User updateUser(UUID userId, String newUserName) {
+    public User updateUser(UUID userId, String newUserName, String newEmail, String newPassword) {
         User userNullable = null;
         Path path = resolvePath(userId);
         if (Files.exists(path)) {
@@ -87,7 +87,7 @@ public class FileUserService implements UserService {
 
         User user = Optional.ofNullable(userNullable)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        user.updateUserName(newUserName);
+        user.update(newUserName, newEmail, newPassword);
 
         try(
                 FileOutputStream fos = new FileOutputStream(path.toFile());

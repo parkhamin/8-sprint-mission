@@ -20,8 +20,8 @@ public class BasicUserService implements UserService {
     }*/
 
     @Override
-    public User createUser(String userName) {
-        User user = new User(userName);
+    public User createUser(String userName, String email, String password) {
+        User user = new User(userName, email, password);
         return userRepository.save(user);
     }
 
@@ -32,10 +32,10 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public User updateUser(UUID userId, String newUserName) {
+    public User updateUser(UUID userId, String newUserName, String newEmail, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        user.updateUserName(newUserName);
+        user.update(newUserName, newEmail, newPassword);
         return userRepository.save(user);
     }
 

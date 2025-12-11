@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -42,8 +43,8 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public Channel createChannel(String channelName) {
-        Channel channel = new Channel(channelName);
+    public Channel createChannel(ChannelType type, String channelName, String description) {
+        Channel channel = new Channel(type, channelName, description);
         Path path = resolvePath(channel.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -76,7 +77,7 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public Channel updateChannel(UUID channelId, String newChannelName) {
+    public Channel updateChannel(UUID channelId, String newChannelName, String newDescription) {
         Channel channelNullable = null;
         Path path = resolvePath(channelId);
         if (Files.exists(path)) {
@@ -92,7 +93,7 @@ public class FileChannelService implements ChannelService {
 
         Channel channel = Optional.ofNullable(channelNullable)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
-        channel.updateChannelName(newChannelName);
+        channel.update(newChannelName, newDescription);
 
         try(
                 FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -135,47 +136,6 @@ public class FileChannelService implements ChannelService {
                         }
                     })
                     .toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void addUserToChannel(UUID userId, UUID channelId) {
-        Channel channel = getChannel(channelId);
-        User user = userService.getUser(userId);
-
-        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-
-        channel.addUser(userId);
-        Path path = resolvePath(channel.getId());
-        try (
-                FileOutputStream fos = new FileOutputStream(path.toFile());
-                ObjectOutputStream oos = new ObjectOutputStream(fos)
-        ) {
-            oos.writeObject(channel);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void removeUserFromChannel(UUID userId, UUID channelId) {
-        Channel channel = getChannel(channelId);
-        User user = userService.getUser(userId);
-
-        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-
-        channel.removeUser(userId);
-
-        Path path = resolvePath(channel.getId());
-        try (
-                FileOutputStream fos = new FileOutputStream(path.toFile());
-                ObjectOutputStream oos = new ObjectOutputStream(fos)
-        ) {
-            oos.writeObject(channel);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

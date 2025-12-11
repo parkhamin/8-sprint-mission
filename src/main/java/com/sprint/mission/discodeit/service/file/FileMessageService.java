@@ -47,9 +47,6 @@ public class FileMessageService implements MessageService {
     public Message createMessage(String messageContent, UUID userId, UUID channelId) {
         if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if(!channelService.getChannel(channelId).getUsers().contains(userId)){
-            throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
-        }
 
         Message message = new Message(messageContent, userId, channelId);
         Path path = resolvePath(message.getId());
@@ -101,7 +98,16 @@ public class FileMessageService implements MessageService {
 
         Message message = Optional.ofNullable(messageNullable)
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
-        message.updateContent(newContent);
+        message.update(newContent);
+
+        try(
+                FileOutputStream fos = new FileOutputStream(path.toFile());
+                ObjectOutputStream oos = new ObjectOutputStream(fos)
+        ) {
+            oos.writeObject(message);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return message;
     }

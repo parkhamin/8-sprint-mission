@@ -34,8 +34,6 @@ public class BasicMessageService implements MessageService{
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
 
-        if (!channel.getUsers().contains(user.getId())) throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
-
         Message message = new Message(messageContent, userId, channelId);
         return messageRepository.save(message);
     }
@@ -51,7 +49,7 @@ public class BasicMessageService implements MessageService{
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
 
-        message.updateContent(newContent);
+        message.update(newContent);
         return messageRepository.save(message);
     }
 

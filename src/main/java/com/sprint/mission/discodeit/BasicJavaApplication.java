@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -21,12 +22,12 @@ import com.sprint.mission.discodeit.service.basic.BasicUserService;
 
 public class BasicJavaApplication {
     static User setupUser(UserService userService){
-        User user = userService.createUser("user1");
+        User user = userService.createUser("user1", "abc@naver.com", "1234");
         return user;
     }
 
     static Channel setupChannel(ChannelService channelService){
-        Channel channel = channelService.createChannel("TEST");
+        Channel channel = channelService.createChannel(ChannelType.PUBLIC,"CH01", "공지사항");
         return channel;
     }
 
@@ -53,19 +54,13 @@ public class BasicJavaApplication {
         ChannelRepository channelRepo = FileChannelRepository.getInstance();
 
         UserService userService = new BasicUserService(userRepo);
-        ChannelService channelService = new BasicChannelService(userRepo, channelRepo);
+        ChannelService channelService = new BasicChannelService(channelRepo);
         MessageService messageService = new BasicMessageService(userRepo, channelRepo, messageRepo);
 
         // 셋업
         User user = setupUser(userService);
         Channel channel = setupChannel(channelService);
         // 테스트
-        /*messageCreateTest(messageService, channel, user);
-        사용자가 채널에 참여하지 않았기 때문에 오류가 난다.
-         */
-
-        channelService.addUserToChannel(user.getId(), channel.getId());
-
         messageCreateTest(messageService, channel, user); // 테스트
     }
 }

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -25,8 +26,8 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public Channel createChannel(String channelName) {
-        Channel channel = new Channel(channelName);
+    public Channel createChannel(ChannelType type, String channelName, String description) {
+        Channel channel = new Channel(type, channelName, description);
         channels.put(channel.getId(), channel);
         return channel;
     }
@@ -40,11 +41,11 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public Channel updateChannel(UUID channelId, String newChannelName) {
+    public Channel updateChannel(UUID channelId, String newChannelName, String newDescription) {
         Channel channel = channels.get(channelId);
 
         if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        channel.updateChannelName(newChannelName);
+        channel.update(newChannelName, newDescription);
 
         return channel;
     }
@@ -58,27 +59,5 @@ public class JCFChannelService implements ChannelService {
     @Override
     public List<Channel> getAllChannels() {
         return new ArrayList<>(channels.values());
-    }
-
-    @Override
-    public void addUserToChannel(UUID userId, UUID channelId) {
-        Channel channel = channels.get(channelId);
-        User user = userService.getUser(userId);
-
-        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-
-        channel.addUser(userId);
-    }
-
-    @Override
-    public void removeUserFromChannel(UUID userId, UUID channelId) {
-        Channel channel = channels.get(channelId);
-        User user = userService.getUser(userId);
-
-        if (channel == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-
-        channel.removeUser(userId);
     }
 }

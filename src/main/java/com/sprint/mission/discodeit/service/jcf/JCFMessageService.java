@@ -30,9 +30,7 @@ public class JCFMessageService implements MessageService {
     public Message createMessage(String messageContent, UUID userId, UUID channelId) {
         if (userService.getUser(userId) == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         if (channelService.getChannel(channelId) == null) throw new IllegalArgumentException("채널을 찾을 수 없습니다.");
-        if(!channelService.getChannel(channelId).getUsers().contains(userId)){
-            throw new IllegalArgumentException("해당 채널에 참여 중이 아닌 사용자입니다.");
-        }
+
         Message message = new Message(messageContent, userId, channelId);
         messages.put(message.getId(), message);
         return  message;
@@ -51,7 +49,7 @@ public class JCFMessageService implements MessageService {
         Message message = messages.get(messageId);
 
         if (message == null) throw new IllegalArgumentException("메시지를 찾을 수 없습니다.");
-        message.updateContent(newContent);
+        message.update(newContent);
         return message;
     }
 

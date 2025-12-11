@@ -20,8 +20,8 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public User createUser(String userName) {
-        User user = new User(userName);
+    public User createUser(String userName, String email ,String password) {
+        User user = new User(userName, email, password);
         users.put(user.getId(), user);
         return user;
     }
@@ -35,11 +35,11 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public User updateUser(UUID userId, String newUserName) {
+    public User updateUser(UUID userId, String newUserName, String newEmail, String newPassword) {
         User user = users.get(userId);
 
         if (user == null) throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        user.updateUserName(newUserName);
+        user.update(newUserName, newEmail, newPassword);
 
         return user;
     }
