@@ -1,8 +1,11 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.io.Serial;
 import java.io.Serializable;
 
+@Getter
 public class User extends Common implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -13,9 +16,9 @@ public class User extends Common implements Serializable {
         this.userName = userName;
     }
 
-    public String getUserName() {
+    /*public String getUserName() {
         return userName;
-    }
+    }*/
 
     public void updateUserName(String newUserName) {
         this.userName = newUserName;

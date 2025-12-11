@@ -1,9 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
+@Getter
 public class Message extends Common implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -18,22 +21,22 @@ public class Message extends Common implements Serializable {
         this.channelId = channelId;
     }
 
-    public String getContent() {
+    /*public String getContent() {
         return content;
-    }
+    }*/
 
     public void updateContent(String newContent) {
         this.content = newContent;
         update();
     }
 
-    public UUID getSenderId() {
+    /*public UUID getSenderId() {
         return senderId;
     }
 
     public UUID getChannelId() {
         return channelId;
-    }
+    }*/
 
     @Override
     public String toString() {
