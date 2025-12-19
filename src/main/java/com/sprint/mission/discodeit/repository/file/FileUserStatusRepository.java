@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -14,12 +15,12 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Repository
-public class FileMessageRepository implements MessageRepository {
+public class FileUserStatusRepository implements UserStatusRepository {
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
-    public FileMessageRepository() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), ".discodeit", Message.class.getSimpleName());
+    public FileUserStatusRepository() {
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), ".discodeit", UserStatus.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
                 Files.createDirectories(DIRECTORY);
@@ -34,34 +35,54 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public Message save(Message message) {
-        Path path = resolvePath(message.getId());
+    public UserStatus save(UserStatus userStatus) {
+        Path path = resolvePath(userStatus.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
-            oos.writeObject(message);
+            oos.writeObject(userStatus);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return message;
+        return userStatus;
     }
 
     @Override
-    public Optional<Message> findById(UUID id) {
-        Message messageNullable = null;
+    public Optional<UserStatus> findById(UUID id) {
+        UserStatus userStatusNullable = null;
         Path path = resolvePath(id);
         if (Files.exists(path)) {
             try (
-                    FileInputStream fis = new FileInputStream(path.toFile());
-                    ObjectInputStream ois = new ObjectInputStream(fis)
+                    FileOutputStream fos = new FileOutputStream(path.toFile());
+                    ObjectOutputStream oos = new ObjectOutputStream(fos)
             ) {
-                messageNullable = (Message) ois.readObject();
+                userStatusNullable = (UserStatus) oos.writeObject();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
-        return Optional.ofNullable(messageNullable);
+        return Optional.ofNullable(userStatusNullable);
+    }
+
+    @Override
+    public Optional<UserStatus> findByUserId(UUID userId) {
+        return this.findAll().stream()
+                .filter(userStatus -> userStatus.getUserId().equals(userId))
+                .findAny();
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+        Path path = resolvePath(id);
+        return Files.exists(path);
+    }
+
+    @Override
+    public void deleteByUserId(UUID userId) {
+        this.findAll().stream()
+                .filter(userStatus -> userStatus.getUserId().equals(userId))
+                .forEach(userStatus -> {this.deleteById(userStatus.getId());});
     }
 
     @Override
@@ -74,9 +95,8 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
-
     @Override
-    public List<Message> findAllByChannelId(UUID channelId) {
+    public List<UserStatus> findAll() {
         try (Stream<Path> paths = Files.list(DIRECTORY)) {
             return paths
                     .filter(path -> path.toString().endsWith(EXTENSION))
@@ -85,27 +105,13 @@ public class FileMessageRepository implements MessageRepository {
                                 FileInputStream fis = new FileInputStream(path.toFile());
                                 ObjectInputStream ois = new ObjectInputStream(fis)
                         ) {
-                            return (Message) ois.readObject();
+                            return (UserStatus) ois.readObject();
                         } catch (IOException | ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }
                     })
-                    .filter(message -> message.getChannelId().equals(channelId))
                     .toList();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteAllByChannelId(UUID channelId) {
-        this.findAllByChannelId(channelId)
-                .forEach(message -> this.deleteById(message.getId()));
-    }
-
-    @Override
-    public boolean existsById(UUID id) {
-        Path path = resolvePath(id);
-        return Files.exists(path);
     }
 }

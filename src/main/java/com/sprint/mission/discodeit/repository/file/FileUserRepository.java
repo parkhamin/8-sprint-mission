@@ -11,14 +11,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Repository
 public class FileUserRepository implements UserRepository {
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
-    private FileUserRepository() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
+    public FileUserRepository() {
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), ".discodeit", User.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
                 Files.createDirectories(DIRECTORY);
@@ -26,14 +27,6 @@ public class FileUserRepository implements UserRepository {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    private static class SingletonHolder{
-        private static final FileUserRepository INSTANCE = new FileUserRepository();
-    }
-
-    public static FileUserRepository getInstance(){
-        return SingletonHolder.INSTANCE;
     }
 
     private Path resolvePath(UUID id) {
@@ -83,8 +76,8 @@ public class FileUserRepository implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        try {
-            return Files.list(DIRECTORY)
+        try (Stream<Path> paths = Files.list(DIRECTORY)) {
+            return paths
                     .filter(path -> path.toString().endsWith(EXTENSION))
                     .map(path -> {
                         try (
@@ -100,5 +93,30 @@ public class FileUserRepository implements UserRepository {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Optional<User> findByUserName(String userName) {
+        return findAll().stream()
+                .filter(user -> user.getUserName().equals(userName))
+                .findAny();
+    }
+
+    @Override
+    public boolean existByUserName(String userName) {
+        return findAll().stream()
+                .anyMatch(user -> user.getUserName().equals(userName));
+    }
+
+    @Override
+    public boolean existByEmail(String email) {
+        return findAll().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existById(UUID id) {
+        Path path = resolvePath(id);
+        return Files.exists(path);
     }
 }

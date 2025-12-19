@@ -2,22 +2,16 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
+@Repository
 public class JCFChannelRepository implements ChannelRepository {
     private final Map<UUID, Channel> channels;
 
-    private JCFChannelRepository(){
+    public JCFChannelRepository(){
         this.channels = new HashMap<>();
-    }
-
-    private static class SingletonHolder{
-        private static final JCFChannelRepository INSTANCE = new JCFChannelRepository();
-    }
-
-    public static JCFChannelRepository getInstance(){
-        return SingletonHolder.INSTANCE;
     }
 
     @Override
@@ -38,6 +32,11 @@ public class JCFChannelRepository implements ChannelRepository {
 
     @Override
     public List<Channel> findAll() {
-        return (List<Channel>) this.channels.values();
+        return this.channels.values().stream().toList();
+    }
+
+    @Override
+    public boolean existById(UUID id) {
+        return this.channels.containsKey(id);
     }
 }
