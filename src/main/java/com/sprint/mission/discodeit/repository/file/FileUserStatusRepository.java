@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -54,10 +53,10 @@ public class FileUserStatusRepository implements UserStatusRepository {
         Path path = resolvePath(id);
         if (Files.exists(path)) {
             try (
-                    FileOutputStream fos = new FileOutputStream(path.toFile());
-                    ObjectOutputStream oos = new ObjectOutputStream(fos)
+                    FileInputStream fis = new FileInputStream(path.toFile());
+                    ObjectInputStream ois = new ObjectInputStream(fis)
             ) {
-                userStatusNullable = (UserStatus) oos.writeObject();
+                userStatusNullable = (UserStatus) ois.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -82,7 +81,9 @@ public class FileUserStatusRepository implements UserStatusRepository {
     public void deleteByUserId(UUID userId) {
         this.findAll().stream()
                 .filter(userStatus -> userStatus.getUserId().equals(userId))
-                .forEach(userStatus -> {this.deleteById(userStatus.getId());});
+                .forEach(userStatus -> {
+                    this.deleteById(userStatus.getId());
+                });
     }
 
     @Override
@@ -113,5 +114,6 @@ public class FileUserStatusRepository implements UserStatusRepository {
                     .toList();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
     }
 }
