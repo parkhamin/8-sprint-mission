@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
+import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
@@ -11,23 +14,27 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 @SpringBootApplication
 public class DiscodeitApplication {
     static User setupUser(UserService userService){
-        User user = userService.create("user1", "abc@naver.com", "1234");
+        UserCreateRequest userCreateRequest = new UserCreateRequest("woody", "woody@codeit.com", "woody1234");
+        User user = userService.create(userCreateRequest, Optional.empty());
         return user;
     }
 
     static Channel setupChannel(ChannelService channelService){
-        Channel channel = channelService.create(ChannelType.PUBLIC, "TEST", "공지사항");
+        PublicChannelCreateRequest publicChannelCreateRequest = new PublicChannelCreateRequest("공지", "공지채널입니다");
+        Channel channel = channelService.create(publicChannelCreateRequest);
         return channel;
     }
 
-    static Message messageCreateTest(MessageService messageService, Channel channel, User sender){
-        Message message = messageService.create("Hello!", sender.getId(), channel.getId());
+    static void messageCreateTest(MessageService messageService, Channel channel, User sender){
+        MessageCreateRequest messageCreateRequest = new MessageCreateRequest("안녕하세요!", channel.getId(), sender.getId()  );
+        Message message = messageService.create(messageCreateRequest, new ArrayList<>());
         System.out.println("메시지 생성: " + message.getId());
-        System.out.println("[" + channel.getChannelName() + "] " + message.getContent());
-        return message;
     }
 
     public static void main(String[] args) {

@@ -21,7 +21,7 @@ public class Message implements Serializable {
     private final UUID channelId; // 메시지를 보내는 채널의 번호
     List<UUID> attachmentIds;
 
-    public Message(String content, UUID senderId, UUID channelId, List<UUID> attachmentIds) {
+    public Message(String content, UUID channelId, UUID senderId,List<UUID> attachmentIds) {
         this.id = UUID.randomUUID();
         this.createdAt = Instant.now();
         this.content = content;
