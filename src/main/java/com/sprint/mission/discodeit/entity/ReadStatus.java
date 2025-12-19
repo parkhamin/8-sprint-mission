@@ -17,7 +17,7 @@ public class ReadStatus implements Serializable {
     private Instant updatedAt;
     private final UUID userId;
     private final UUID channelId;
-    private Instant lastReadAt; // 마지막으로 메시지를 표현하기 위함
+    private Instant lastReadAt;
 
     public ReadStatus(UUID userId, UUID channelId, Instant lastReadAt) {
         this.id = UUID.randomUUID();

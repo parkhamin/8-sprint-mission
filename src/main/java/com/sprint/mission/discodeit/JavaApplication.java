@@ -38,17 +38,17 @@ public class JavaApplication {
         System.out.println("사용자 Id: " + user1.getId() + " 사용자 이름: " + user1.getUserName());
 
         System.out.println("사용자 다건 조회");
-        userService.getAllUsers().stream().forEach(System.out::println);
+        userService.findAll().stream().forEach(System.out::println);
 
         System.out.println("사용자 수정");
         System.out.print("수정 전: " + user1.getUserName() + " -> 수정 후: ");
         userService.updateUser(user1.getId(), "수정된 user1", null, null);
-        System.out.println(userService.getUser(user1.getId()).getUserName());
+        System.out.println(userService.find(user1.getId()));
 
         System.out.println("사용자 삭제");
         System.out.println("----- 수정된 user1 사용자 삭제된 것 확인 -----");
         userService.deleteUser(user1.getId());
-        userService.getAllUsers().stream().forEach(System.out::println);
+        userService.findAll().stream().forEach(System.out::println);
 
         System.out.println("채널 CRUD 테스트");
         System.out.println("채널 생성");
