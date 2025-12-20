@@ -60,7 +60,7 @@ public class BasicMessageService implements MessageService{
     @Override
     public Message find(UUID messageId) {
         return messageRepository.findById(messageId)
-                .orElseThrow(() -> new NoSuchElementException(messageId + " 메시지를 찾을 수 없습니다."))
+                .orElseThrow(() -> new NoSuchElementException(messageId + " 메시지를 찾을 수 없습니다."));
     }
 
     @Override
