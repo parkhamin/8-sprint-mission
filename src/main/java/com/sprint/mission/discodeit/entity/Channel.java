@@ -1,45 +1,59 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.*;
 
-public class Channel extends Common implements Serializable {
+@Getter
+public class Channel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    private final UUID id;
+    private final Instant createdAt;
+    private Instant updatedAt;
     private String channelName; // 채널의 이름
-    private Set<UUID> users; // 채널에 들어온 사용자들의 목록(중복 불가)
+    private final ChannelType type;
+    private String description;
 
-    public Channel(String channelName) { // 생성자의 파라미터를 통해 초기화
-        super();
-        this.users = new HashSet<>();
+    public Channel(ChannelType type, String channelName, String description) {
+        this.id = UUID.randomUUID();
+        this.createdAt = Instant.now();
         this.channelName = channelName;
+        this.type = type;
+        this.description = description;
     }
 
-    public String getChannelName() {
-        return channelName;
-    }
+    public void update(String newChannelName , String newDescription) {
+        boolean isUpdated = false;
 
-    public void addUser(UUID uuid) { // 채널에 사용자가 입장
-        users.add(uuid);
-    }
-    public void removeUser(UUID uuid) { // 사용자가 채널 퇴장
-        users.remove(uuid);
-    }
+        if (!this.channelName.equals(newChannelName) && newChannelName != null) {
+            this.channelName = newChannelName;
+            isUpdated = true;
+        }
 
-    public Set<UUID> getUsers() {
-        return users;
-    }
+        if (!this.description.equals(newDescription) && newDescription != null) {
+            this.description = newDescription;
+            isUpdated = true;
+        }
 
-    public void updateChannelName(String newChannelName) {
-        this.channelName = newChannelName;
-        update();
+        if (isUpdated) {
+            this.updatedAt = Instant.now();
+        }
     }
 
     @Override
     public String toString() {
         return "Channel {" +
-                "channelName='" + channelName + '\'' +
-                '}' + " , " + super.toString();
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", channelName='" + channelName + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
