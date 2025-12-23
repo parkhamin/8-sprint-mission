@@ -81,20 +81,24 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
         }
 
-        UUID nullableProfileId = profileCreateRequest
-                .map(profileRequest -> {
-                    Optional.ofNullable(user.getProfileId())
-                            .ifPresent(binaryContentRepository::deleteById); // 프로필을 업데이트 하기 전 기존 프로필 제거
+        UUID profileId = user.getProfileId();
 
-                    String fileName = profileRequest.fileName();
-                    String contentType = profileRequest.contentType();
-                    byte[] bytes = profileRequest.bytes();
-                    BinaryContent binaryContent = new BinaryContent(fileName, (long) bytes.length, contentType, bytes);
-                    return binaryContentRepository.save(binaryContent).getId();
-                })
-                .orElse(null);
+        if (profileCreateRequest.isPresent()){
+            BinaryContentCreateRequest profileRequest = profileCreateRequest.get();
+            Optional.ofNullable(user.getProfileId()).ifPresent(binaryContentRepository::deleteById);
 
-        user.update(newUserName, newEmail, newPassword, nullableProfileId);
+            byte[] bytes = profileRequest.bytes();
+            BinaryContent binaryContent = new BinaryContent(
+                    profileRequest.fileName(),
+                    (long) bytes.length,
+                    profileRequest.contentType(),
+                    bytes
+            );
+
+            profileId = binaryContentRepository.save(binaryContent).getId();
+        }
+
+        user.update(newUserName, newEmail, newPassword, profileId);
         return userRepository.save(user);
     }
 
@@ -105,6 +109,9 @@ public class BasicUserService implements UserService {
 
         Optional.ofNullable(user.getProfileId())
                 .ifPresent(binaryContentRepository::deleteById);
+
+        // 유저를 지우기 위해서 프로필 지우고 userStatus 지우기
+        userStatusRepository.deleteByUserId(userId);
 
         userRepository.deleteById(userId);
     }
@@ -124,14 +131,6 @@ public class BasicUserService implements UserService {
                 .map(userStatus -> userStatus.isOnline())
                 .orElse(null);
 
-        return new UserDTO(
-                user.getId(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
-                user.getUserName(),
-                user.getEmail(),
-                user.getProfileId(),
-                online
-        );
+        return UserDTO.fromEntity(user, online);
     }
 }

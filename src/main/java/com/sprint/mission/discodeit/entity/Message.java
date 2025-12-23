@@ -19,7 +19,7 @@ public class Message implements Serializable {
     private String content; // 메시지의 내용
     private final UUID senderId; // 메시지 발신자
     private final UUID channelId; // 메시지를 보내는 채널의 번호
-    List<UUID> attachmentIds;
+    private List<UUID> attachmentIds;
 
     public Message(String content, UUID channelId, UUID senderId,List<UUID> attachmentIds) {
         this.id = UUID.randomUUID();

@@ -29,13 +29,12 @@ public class BasicUserStatusService implements UserStatusService {
             throw new IllegalArgumentException(userId + " 사용자를 찾을 수 없습니다.");
         }
 
-        if (userStatusRepository.existsById(userId)) {
+        if (userStatusRepository.findByUserId(userId).isPresent()) {
             throw new IllegalArgumentException(userId + "의 userStatus가 이미 존재합니다.");
         }
 
         UserStatus userStatus = new UserStatus(userId, lastConnectedAt);
-        userStatusRepository.save(userStatus);
-        return userStatus;
+        return userStatusRepository.save(userStatus);
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Getter
 public class UserStatus implements Serializable {
+    private static final long ONLINE_THRESHOLD_SECONDS = 300L;
     @Serial
     private final static long serialVersionUID = 1L;
 
@@ -38,6 +39,6 @@ public class UserStatus implements Serializable {
     }
 
     public boolean isOnline() {
-        return Instant.now().minusSeconds(300).isBefore(this.lastConnectAt);
+        return Instant.now().minusSeconds(ONLINE_THRESHOLD_SECONDS).isBefore(this.lastConnectAt);
     }
 }

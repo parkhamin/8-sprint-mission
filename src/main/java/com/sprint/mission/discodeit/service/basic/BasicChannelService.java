@@ -29,8 +29,7 @@ public class BasicChannelService implements ChannelService {
         String description = channelCreateRequest.description();
 
         Channel channel = new Channel(ChannelType.PUBLIC, channelName, description);
-        channelRepository.save(channel);
-        return channel;
+        return channelRepository.save(channel);
     }
 
     @Override
@@ -82,21 +81,17 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public List<ChannelDTO> findAllByUserId(UUID userId) {
-        List<UUID> mySubscribedChannelIds = new ArrayList<>();
-        for (ReadStatus readStatus : readStatusRepository.findAllByUserId(userId)) {
-            UUID channelId = readStatus.getChannelId();
-            mySubscribedChannelIds.add(channelId);
-        }
+        List<UUID> mySubscribedChannelIds = readStatusRepository.findAllByUserId(userId).stream()
+                .map(ReadStatus::getChannelId)
+                .toList();
 
-        List<ChannelDTO> list = new ArrayList<>();
-        for (Channel channel : channelRepository.findAll()) {
-            if (channel.getType().equals(ChannelType.PUBLIC)
-                    || mySubscribedChannelIds.contains(channel.getId())) {
-                ChannelDTO channelDTO = toChannelDTO(channel);
-                list.add(channelDTO);
-            }
-        }
-        return list;
+        return channelRepository.findAll().stream()
+                .filter(channel ->
+                        channel.getType().equals(ChannelType.PUBLIC)
+                            || mySubscribedChannelIds.contains(channel.getId())
+                )
+                .map(this::toChannelDTO)
+                .toList();
     }
 
     private ChannelDTO toChannelDTO(Channel channel) {
@@ -120,13 +115,6 @@ public class BasicChannelService implements ChannelService {
                     .forEach(participantIds::add);
         }
 
-        return new ChannelDTO(
-                channel.getId(),
-                channel.getType(),
-                channel.getChannelName(),
-                channel.getDescription(),
-                participantIds,
-                lastMessageAt
-        );
+        return ChannelDTO.fromEntity(channel, lastMessageAt, participantIds);
     }
 }
