@@ -3,18 +3,18 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.UserDTO;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
+    private final UserStatusService userStatusService;
 
     // 사용자를 등록할 수 있다.
     // User create(UserCreateRequest userCreateRequest, Optional<BinaryContentCreateRequest> profileCreateRequest);
@@ -83,5 +84,18 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDTOList);
+    }
+
+    // 사용자의 온라인 상태를 업데이트할 수 있다.
+    // UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest);
+    @RequestMapping(value = "/updateByUserId")
+    public ResponseEntity<UserStatus> updateByUserId(
+            @RequestParam("userId") UUID userId,
+            @RequestBody UserStatusUpdateRequest userStatusUpdateRequest
+            ) {
+        UserStatus userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userStatus);
     }
 }
