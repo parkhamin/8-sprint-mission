@@ -39,7 +39,7 @@ public class UserController {
         Optional<BinaryContentCreateRequest> profileCreateRequest =
                 Optional.ofNullable(profile)
                         .filter(p -> !p.isEmpty())
-                        .map(BinaryContentCreateRequest::fileToRequest);
+                        .map(BinaryContentCreateRequest::fileFromRequest);
 
         User user = userService.create(userCreateRequest, profileCreateRequest);
         return ResponseEntity
@@ -58,7 +58,7 @@ public class UserController {
         Optional<BinaryContentCreateRequest> profileUpdateRequest =
                 Optional.ofNullable(profile)
                         .filter(p -> !p.isEmpty())
-                        .map(BinaryContentCreateRequest::fileToRequest);
+                        .map(BinaryContentCreateRequest::fileFromRequest);
 
         User user = userService.update(userId, userUpdateRequest, profileUpdateRequest);
         return ResponseEntity

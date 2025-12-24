@@ -20,7 +20,7 @@ public record BinaryContentCreateRequest(
             this.bytes = bytes;
         }*/
 
-        public static BinaryContentCreateRequest fileToRequest(MultipartFile file) {
+        public static BinaryContentCreateRequest fileFromRequest(MultipartFile file) {
             try{
                 return new BinaryContentCreateRequest(
                         file.getOriginalFilename(),
