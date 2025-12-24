@@ -70,8 +70,8 @@ public class ChannelController {
 
     // 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
     // List<ChannelDTO> findAllByUserId(UUID userId);
-    @RequestMapping("/findChannelsByUserId")
-    public ResponseEntity<List<ChannelDTO>> findChannelsByUserId(@RequestParam("userId") UUID userId){
+    @RequestMapping("/findAllByUserId")
+    public ResponseEntity<List<ChannelDTO>> findAllByUserId(@RequestParam("userId") UUID userId){
         List<ChannelDTO> Channels = channelService.findAllByUserId(userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
