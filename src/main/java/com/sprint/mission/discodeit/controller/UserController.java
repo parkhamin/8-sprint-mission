@@ -88,8 +88,8 @@ public class UserController {
 
     // 사용자의 온라인 상태를 업데이트할 수 있다.
     // UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest);
-    @RequestMapping(value = "/updateByUserId")
-    public ResponseEntity<UserStatus> updateByUserId(
+    @RequestMapping(value = "/updateUserStatusByUserId")
+    public ResponseEntity<UserStatus> updateUserStatusByUserId(
             @RequestParam("userId") UUID userId,
             @RequestBody UserStatusUpdateRequest userStatusUpdateRequest
             ) {
