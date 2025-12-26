@@ -37,10 +37,9 @@ public class BasicChannelService implements ChannelService {
         Channel channel = new Channel(ChannelType.PRIVATE, null, null);
         Channel createdChannel = channelRepository.save(channel);
 
-        for (UUID userId : channelCreateRequest.joinIds()) {
-            ReadStatus readStatus = new ReadStatus(userId, channel.getId(), null);
-            readStatusRepository.save(readStatus);
-        }
+        channelCreateRequest.joinIds().stream() // 채널의 참여자들을 스트림으로 변환
+                .map(userId -> new ReadStatus(userId, createdChannel.getId(), Instant.MIN)) // 각 참여자마다 readStatus 객체 생성
+                .forEach(readStatusRepository::save);
 
         return createdChannel;
     }
