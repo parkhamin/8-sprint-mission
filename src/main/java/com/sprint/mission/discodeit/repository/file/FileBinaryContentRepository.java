@@ -79,7 +79,9 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
         Path path = resolvePath(id);
         try {
             Files.delete(path);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

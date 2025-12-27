@@ -29,7 +29,7 @@ public class MessageController {
             @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
             @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
     ) {
-        List<BinaryContentCreateRequest> filesRequests = Optional.of(attachments)
+        List<BinaryContentCreateRequest> filesRequests = Optional.ofNullable(attachments)
             .map(files -> files.stream() // 요청들을 스트림화
                 .map(file -> { // 하나의 요청들에 대해서
                     try {
