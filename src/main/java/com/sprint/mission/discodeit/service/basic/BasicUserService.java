@@ -73,12 +73,16 @@ public class BasicUserService implements UserService {
         String newEmail = userUpdateRequest.newEmail();
         String newPassword = userUpdateRequest.newPassword();
 
-        if (userRepository.existByUserName(newUserName)){ // userName 중복 확인
-            throw new IllegalArgumentException(newUserName + " 사용자가 이미 존재합니다.");
+        if (newUserName != null) {
+            if (userRepository.existByUserName(newUserName)){ // userName 중복 확인
+                throw new IllegalArgumentException(newUserName + " 사용자가 이미 존재합니다.");
+            }
         }
 
-        if (userRepository.existByEmail(newEmail)){
-            throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
+        if (newEmail != null) {
+            if (userRepository.existByEmail(newEmail)){
+                throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
+            }
         }
 
         UUID profileId = user.getProfileId();

@@ -19,37 +19,7 @@ import java.util.Optional;
 
 @SpringBootApplication
 public class DiscodeitApplication {
-    static User setupUser(UserService userService){
-        UserCreateRequest userCreateRequest = new UserCreateRequest("woody", "woody@codeit.com", "woody1234");
-        User user = userService.create(userCreateRequest, Optional.empty());
-        return user;
-    }
-
-    static Channel setupChannel(ChannelService channelService){
-        PublicChannelCreateRequest publicChannelCreateRequest = new PublicChannelCreateRequest("공지", "공지채널입니다");
-        Channel channel = channelService.create(publicChannelCreateRequest);
-        return channel;
-    }
-
-    static void messageCreateTest(MessageService messageService, Channel channel, User sender){
-        MessageCreateRequest messageCreateRequest = new MessageCreateRequest("안녕하세요!", channel.getId(), sender.getId()  );
-        Message message = messageService.create(messageCreateRequest, new ArrayList<>());
-        System.out.println("메시지 생성: " + message.getId());
-    }
-
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(DiscodeitApplication.class, args);
-
-        // 서비스 초기화
-        UserService userService = context.getBean(UserService.class);
-        ChannelService channelService = context.getBean(ChannelService.class);
-        MessageService messageService = context.getBean(MessageService.class);
-
-        // 셋업
-        User user = setupUser(userService);
-        Channel channel = setupChannel(channelService);
-
-        // 테스트
-        messageCreateTest(messageService, channel, user);
     }
 }

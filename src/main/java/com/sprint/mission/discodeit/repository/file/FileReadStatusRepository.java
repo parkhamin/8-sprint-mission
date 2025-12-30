@@ -40,7 +40,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
     @Override
     public ReadStatus save(ReadStatus readStatus) {
-        Path path = resolvePath(readStatus.getChannelId());
+        Path path = resolvePath(readStatus.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)

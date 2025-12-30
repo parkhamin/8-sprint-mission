@@ -9,10 +9,10 @@ public record UserDTO(
         UUID id,
         Instant createdAt,
         Instant updatedAt,
-        String userName, // 사용자의 이름
+        String username, // 사용자의 이름
         String email,
         UUID profileId,
-        boolean isOnline
+        Boolean online
 ) {
     public static UserDTO fromEntity(
             User user, boolean online
