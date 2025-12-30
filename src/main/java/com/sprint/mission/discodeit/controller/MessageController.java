@@ -31,17 +31,7 @@ public class MessageController {
     ) {
         List<BinaryContentCreateRequest> filesRequests = Optional.ofNullable(attachments)
             .map(files -> files.stream() // 요청들을 스트림화
-                .map(file -> { // 하나의 요청들에 대해서
-                    try {
-                        return new BinaryContentCreateRequest( // 요청들을 파일로 변환
-                            file.getOriginalFilename(),
-                            file.getContentType(),
-                            file.getBytes()
-                        );
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(BinaryContentCreateRequest::fileFromRequest)
                 .toList() // 스트림을 List로 변환
             ).orElse(new ArrayList<>()); // 요청이 null일 경우 처리
 
