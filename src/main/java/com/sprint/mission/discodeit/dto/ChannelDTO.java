@@ -8,25 +8,26 @@ import java.util.List;
 import java.util.UUID;
 
 public record ChannelDTO(
-        UUID id,
-        ChannelType type,
-        String name,
-        String description,
-        List<UUID> participantIds,
-        Instant lastMessageAt
+    UUID id,
+    ChannelType type,
+    String name,
+    String description,
+    List<UUID> participantIds,
+    Instant lastMessageAt
 ) {
-    public static ChannelDTO fromEntity(
-            Channel channel,
-            Instant lastMessageAt,
-            List<UUID> participantIds
-    ) {
-        return new ChannelDTO(
-                channel.getId(),
-                channel.getType(),
-                channel.getChannelName(),
-                channel.getDescription(),
-                participantIds,
-                lastMessageAt
-        );
-    }
+
+  public static ChannelDTO fromEntity(
+      Channel channel,
+      Instant lastMessageAt,
+      List<UUID> participantIds
+  ) {
+    return new ChannelDTO(
+        channel.getId(),
+        channel.getType(),
+        channel.getName(),
+        channel.getDescription(),
+        participantIds,
+        lastMessageAt
+    );
+  }
 }
