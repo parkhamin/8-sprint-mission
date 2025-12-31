@@ -9,36 +9,38 @@ import java.util.UUID;
 
 @Getter
 public class UserStatus implements Serializable {
-    private static final long ONLINE_THRESHOLD_SECONDS = 300L;
-    @Serial
-    private final static long serialVersionUID = 1L;
 
-    private final UUID id;
-    private final Instant createdAt;
-    private Instant updatedAt;
-    private final UUID userId;
-    private Instant lastConnectAt;
+  private static final long ONLINE_THRESHOLD_SECONDS = 300L;
+  @Serial
+  private final static long serialVersionUID = 1L;
 
-    public UserStatus(UUID userId, Instant lastConnectAt) {
-        this.id = UUID.randomUUID();
-        this.createdAt = Instant.now();
-        this.userId = userId;
-        this.lastConnectAt = lastConnectAt;
+  private final UUID id;
+  private final Instant createdAt;
+  private Instant updatedAt;
+  private final UUID userId;
+  private Instant lastActiveAt;
+
+  public UserStatus(UUID userId, Instant lastActiveAt) {
+    this.id = UUID.randomUUID();
+    this.createdAt = Instant.now();
+    this.userId = userId;
+    this.lastActiveAt = lastActiveAt;
+  }
+
+  public void update(Instant lastActiveAt) {
+    boolean isUpdated = false;
+
+    if (!lastActiveAt.equals(this.lastActiveAt) && lastActiveAt != null) {
+      this.lastActiveAt = lastActiveAt;
+      isUpdated = true;
     }
 
-    public void update(Instant newLastConnectAt){
-        boolean isUpdated = false;
-
-        if (!newLastConnectAt.equals(this.lastConnectAt) && newLastConnectAt != null) {
-            this.lastConnectAt = newLastConnectAt;
-        }
-
-        if (isUpdated) {
-            this.updatedAt = Instant.now();
-        }
+    if (isUpdated) {
+      this.updatedAt = Instant.now();
     }
+  }
 
-    public boolean isOnline() {
-        return Instant.now().minusSeconds(ONLINE_THRESHOLD_SECONDS).isBefore(this.lastConnectAt);
-    }
+  public boolean isOnline() {
+    return Instant.now().minusSeconds(ONLINE_THRESHOLD_SECONDS).isBefore(this.lastActiveAt);
+  }
 }

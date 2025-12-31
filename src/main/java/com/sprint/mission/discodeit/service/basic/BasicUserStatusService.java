@@ -17,64 +17,65 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BasicUserStatusService implements UserStatusService {
-    private final UserStatusRepository userStatusRepository;
-    private final UserRepository userRepository;
 
-    @Override
-    public UserStatus create(UserStatusCreateRequest userStatusCreateRequest) {
-        UUID userId = userStatusCreateRequest.userId();
-        Instant lastConnectedAt = userStatusCreateRequest.lastConnectAt();
+  private final UserStatusRepository userStatusRepository;
+  private final UserRepository userRepository;
 
-        if (!userRepository.existById(userId)) {
-            throw new IllegalArgumentException(userId + " 사용자를 찾을 수 없습니다.");
-        }
+  @Override
+  public UserStatus create(UserStatusCreateRequest userStatusCreateRequest) {
+    UUID userId = userStatusCreateRequest.userId();
+    Instant lastActiveAt = userStatusCreateRequest.lastActiveAt();
 
-        if (userStatusRepository.findByUserId(userId).isPresent()) {
-            throw new IllegalArgumentException(userId + "의 userStatus가 이미 존재합니다.");
-        }
-
-        UserStatus userStatus = new UserStatus(userId, lastConnectedAt);
-        return userStatusRepository.save(userStatus);
+    if (!userRepository.existById(userId)) {
+      throw new IllegalArgumentException(userId + " 사용자를 찾을 수 없습니다.");
     }
 
-    @Override
-    public UserStatus find(UUID userStatusId) {
-        return userStatusRepository.findById(userStatusId)
-                .orElseThrow(() -> new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다."));
+    if (userStatusRepository.findByUserId(userId).isPresent()) {
+      throw new IllegalArgumentException(userId + "의 userStatus가 이미 존재합니다.");
     }
 
-    @Override
-    public List<UserStatus> findAll() {
-        return userStatusRepository.findAll().stream().toList();
+    UserStatus userStatus = new UserStatus(userId, lastActiveAt);
+    return userStatusRepository.save(userStatus);
+  }
+
+  @Override
+  public UserStatus find(UUID userStatusId) {
+    return userStatusRepository.findById(userStatusId)
+        .orElseThrow(() -> new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다."));
+  }
+
+  @Override
+  public List<UserStatus> findAll() {
+    return userStatusRepository.findAll().stream().toList();
+  }
+
+  @Override
+  public UserStatus update(UUID userStatusId, UserStatusUpdateRequest userStatusUpdateRequest) {
+    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
+
+    UserStatus userStatus = userStatusRepository.findById(userStatusId)
+        .orElseThrow(() -> new NoSuchElementException(userStatusId + "UserStatus를 찾을 수 없습니다."));
+
+    userStatus.update(newLastActiveAt);
+    return userStatusRepository.save(userStatus);
+  }
+
+  @Override
+  public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest) {
+    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
+
+    UserStatus userStatus = userStatusRepository.findByUserId(userId)
+        .orElseThrow(() -> new NoSuchElementException(userId + "사용자를 찾을 수 없습니다."));
+
+    userStatus.update(newLastActiveAt);
+    return userStatusRepository.save(userStatus);
+  }
+
+  @Override
+  public void delete(UUID userStatusId) {
+    if (!userStatusRepository.existsById(userStatusId)) {
+      throw new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다.");
     }
-
-    @Override
-    public UserStatus update(UUID userStatusId, UserStatusUpdateRequest userStatusUpdateRequest) {
-        Instant newLastConnectAt = userStatusUpdateRequest.newLastConnectAt();
-
-        UserStatus userStatus = userStatusRepository.findById(userStatusId)
-                .orElseThrow(() -> new NoSuchElementException(userStatusId + "UserStatus를 찾을 수 없습니다."));
-
-        userStatus.update(newLastConnectAt);
-        return userStatusRepository.save(userStatus);
-    }
-
-    @Override
-    public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest) {
-        Instant newLastConnectAt = userStatusUpdateRequest.newLastConnectAt();
-
-        UserStatus userStatus = userStatusRepository.findByUserId(userId)
-                .orElseThrow(() -> new NoSuchElementException(userId + "사용자를 찾을 수 없습니다."));
-
-        userStatus.update(newLastConnectAt);
-        return userStatusRepository.save(userStatus);
-    }
-
-    @Override
-    public void delete(UUID userStatusId) {
-        if (!userStatusRepository.existsById(userStatusId)) {
-            throw new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다.");
-        }
-        userStatusRepository.deleteById(userStatusId);
-    }
+    userStatusRepository.deleteById(userStatusId);
+  }
 }
