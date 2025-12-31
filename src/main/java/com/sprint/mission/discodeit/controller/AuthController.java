@@ -6,21 +6,20 @@ import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@ResponseBody
 @RequestMapping("api/auth")
 public class AuthController {
     private final AuthService authService;
 
     // 사용자는 로그인할 수 있다.
     // User login(LoginRequest loginRequest);
-    @RequestMapping(value = "/login")
+    @PostMapping(value = "/login")
     public ResponseEntity<User> login(@RequestBody LoginRequest loginRequest){
         User user = authService.login(loginRequest);
 
