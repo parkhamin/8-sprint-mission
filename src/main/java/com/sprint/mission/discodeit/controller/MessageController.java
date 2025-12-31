@@ -9,22 +9,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("api/message")
-@ResponseBody
+@RequestMapping("api/messages")
 public class MessageController {
     private final MessageService messageService;
 
     // 메시지를 보낼 수 있다.
     // Message create(MessageCreateRequest messageCreateRequest, List<BinaryContentCreateRequest> binaryContentCreateRequests);
-    @RequestMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Message> create(
             @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
             @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
@@ -43,9 +44,9 @@ public class MessageController {
 
     // 메시지를 수정할 수 있다.
     // Message update(UUID messageId, MessageUpdateRequest messageUpdateRequest);
-    @RequestMapping(value = "/update")
+    @PatchMapping(value = "/{messageId}")
     public ResponseEntity<Message> update(
-            @RequestParam("messageId") UUID messageId,
+            @PathVariable UUID messageId,
             @RequestBody MessageUpdateRequest messageUpdateRequest
     ) {
         Message message = messageService.update(messageId, messageUpdateRequest);
@@ -56,8 +57,8 @@ public class MessageController {
 
     // 메시지를 삭제할 수 있다.
     // void delete(UUID messageId);
-    @RequestMapping(value = "/delete")
-    public ResponseEntity<Void> delete(@RequestParam("messageId") UUID messageId) {
+    @DeleteMapping(value = "/{messageId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID messageId) {
         messageService.delete(messageId);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -66,7 +67,7 @@ public class MessageController {
 
     // 특정 채널의 메시지 목록을 조회할 수 있다
     // List<Message> findAllByChannelId(UUID channelId);
-    @RequestMapping(value = "/findAllByChannelId")
+    @GetMapping
     public ResponseEntity<List<Message>> findAllByChannelId(@RequestParam("channelId") UUID channelId){
         List<Message> messages = messageService.findAllByChannelId(channelId);
         return ResponseEntity
