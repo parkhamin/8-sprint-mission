@@ -28,14 +28,8 @@ public class UserStatus implements Serializable {
   }
 
   public void update(Instant lastActiveAt) {
-    boolean isUpdated = false;
-
-    if (!lastActiveAt.equals(this.lastActiveAt) && lastActiveAt != null) {
+    if (lastActiveAt != null && !lastActiveAt.equals(this.lastActiveAt)) {
       this.lastActiveAt = lastActiveAt;
-      isUpdated = true;
-    }
-
-    if (isUpdated) {
       this.updatedAt = Instant.now();
     }
   }

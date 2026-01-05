@@ -32,7 +32,7 @@ public class Message implements Serializable {
   }
 
   public void update(String newContent) {
-    if (!newContent.equals(this.content) && newContent != null) {
+    if (newContent != null && !newContent.equals(this.content)) {
       this.content = newContent;
       this.updatedAt = Instant.now();
     }
