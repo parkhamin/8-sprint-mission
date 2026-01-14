@@ -12,20 +12,21 @@ import java.util.NoSuchElementException;
 @Service
 @RequiredArgsConstructor
 public class BasicAuthService implements AuthService {
-    private final UserRepository userRepository;
 
-    @Override
-    public User login(LoginRequest loginRequest){
-        String userName = loginRequest.userName();
-        String password = loginRequest.password();
+  private final UserRepository userRepository;
 
-        User user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new NoSuchElementException(userName + " 사용자를 찾을 수 없습니다."));
+  @Override
+  public User login(LoginRequest loginRequest) {
+    String username = loginRequest.username();
+    String password = loginRequest.password();
 
-        if (!user.getPassword().equals(password)){
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NoSuchElementException(username + " 사용자를 찾을 수 없습니다."));
 
-        return user;
+    if (!user.getPassword().equals(password)) {
+      throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
     }
+
+    return user;
+  }
 }
