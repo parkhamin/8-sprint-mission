@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "channels")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Channel extends BaseUpdatableEntity {
 
   @Enumerated(EnumType.STRING)
@@ -27,6 +26,12 @@ public class Channel extends BaseUpdatableEntity {
 
   @Column(name = "description", length = 500)
   private String description;
+
+  public Channel(ChannelType type, String name, String description) {
+    this.type = type;
+    this.name = name;
+    this.description = description;
+  }
 
   public void update(String newName, String newDescription) {
     if (newName != null && !newName.equals(this.name)) {

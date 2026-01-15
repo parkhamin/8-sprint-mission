@@ -21,18 +21,17 @@ import lombok.NoArgsConstructor;
 @Table(name = "messages")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Message extends BaseUpdatableEntity {
 
   @Column(name = "content")
   private String content;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "channel_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "channel_id", nullable = false)
   private Channel channel;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "author_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
   @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
@@ -42,6 +41,13 @@ public class Message extends BaseUpdatableEntity {
       inverseJoinColumns = @JoinColumn(name = "attachment_id") // 반대편 엔티티(BinaryContent)를 참조하는 FK
   )
   private List<BinaryContent> attachments = new ArrayList<>();
+
+  public Message(String content, Channel channel, User author, List<BinaryContent> attachments) {
+    this.content = content;
+    this.channel = channel;
+    this.author = author;
+    this.attachments = attachments;
+  }
 
   public void update(String newContent) {
     if (newContent != null && !newContent.equals(this.content)) {

@@ -28,16 +28,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReadStatus extends BaseUpdatableEntity {
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "channel_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "channel_id", nullable = false)
   private Channel channel;
 
   @Column(name = "last_read_at", nullable = false)
   private Instant lastReadAt;
+
+  public ReadStatus(User user, Channel channel, Instant lastReadAt) {
+    this.user = user;
+    this.channel = channel;
+    this.lastReadAt = lastReadAt;
+  }
 
   public void update(Instant newLastReadAt) {
     if (newLastReadAt != null && !newLastReadAt.equals(this.lastReadAt)) {

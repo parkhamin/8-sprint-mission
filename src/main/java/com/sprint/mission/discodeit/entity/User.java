@@ -45,6 +45,13 @@ public class User extends BaseUpdatableEntity {
   @OneToOne(mappedBy = "user")
   private UserStatus status;
 
+  public User(String username, String email, String password, BinaryContent profile) {
+    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.profile = profile;
+  }
+
   public void update(String newUsername, String newEmail, String newPassword,
       BinaryContent newProfile) {
     if (newUsername != null && !newUsername.equals(this.username)) {
