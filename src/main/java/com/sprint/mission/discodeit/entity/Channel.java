@@ -1,60 +1,40 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.*;
-
+@Entity
+@Table(name = "channels")
 @Getter
-public class Channel implements Serializable {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class Channel extends BaseUpdatableEntity {
 
-  @Serial
-  private static final long serialVersionUID = 1L;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "type", nullable = false)
+  private ChannelType type;
 
-  private final UUID id;
-  private final Instant createdAt;
-  private Instant updatedAt;
-  private String name; // 채널의 이름
-  private final ChannelType type;
+  @Column(name = "name", length = 100)
+  private String name;
+
+  @Column(name = "description", length = 500)
   private String description;
 
-  public Channel(ChannelType type, String name, String description) {
-    this.id = UUID.randomUUID();
-    this.createdAt = Instant.now();
-    this.name = name;
-    this.type = type;
-    this.description = description;
-  }
-
   public void update(String newName, String newDescription) {
-    boolean isUpdated = false;
-
     if (newName != null && !newName.equals(this.name)) {
       this.name = newName;
-      isUpdated = true;
     }
 
     if (newDescription != null && !newDescription.equals(this.description)) {
       this.description = newDescription;
-      isUpdated = true;
     }
-
-    if (isUpdated) {
-      this.updatedAt = Instant.now();
-    }
-  }
-
-  @Override
-  public String toString() {
-    return "Channel {" +
-        "id=" + id +
-        ", createdAt=" + createdAt +
-        ", updatedAt=" + updatedAt +
-        ", name='" + name + '\'' +
-        ", type=" + type +
-        ", description='" + description + '\'' +
-        '}';
   }
 }
