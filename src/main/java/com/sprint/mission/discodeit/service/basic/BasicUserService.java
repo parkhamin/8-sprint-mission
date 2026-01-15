@@ -16,9 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
@@ -32,38 +34,39 @@ public class BasicUserService implements UserService {
     String email = userCreateRequest.email();
     String password = userCreateRequest.password();
 
-    if (userRepository.existByUsername(username)) { // username 중복 확인
+    if (userRepository.existsByUsername(username)) { // username 중복 확인
       throw new IllegalArgumentException(username + " 사용자가 이미 존재합니다.");
     }
 
-    if (userRepository.existByEmail(email)) {
+    if (userRepository.existsByEmail(email)) {
       throw new IllegalArgumentException(email + " 사용자가 이미 존재합니다.");
     }
 
-    UUID nullableProfileId = profileCreateRequest
+    BinaryContent profile = profileCreateRequest
         .map(profileRequest -> {
           String fileName = profileRequest.fileName();
           String contentType = profileRequest.contentType();
           byte[] bytes = profileRequest.bytes();
           BinaryContent binaryContent = new BinaryContent(fileName, (long) bytes.length,
               contentType, bytes);
-          return binaryContentRepository.save(binaryContent).getId();
+          return binaryContentRepository.save(binaryContent);
         })
         .orElse(null);
 
-    User user = new User(username, email, password, nullableProfileId);
+    User user = new User(username, email, password, profile);
     User createdUser = userRepository.save(user);
 
-    UserStatus userStatus = new UserStatus(createdUser.getId(), Instant.now());
+    UserStatus userStatus = new UserStatus(createdUser, Instant.now());
     userStatusRepository.save(userStatus);
 
     return createdUser;
   }
 
+  @Transactional(readOnly = true)
   @Override
   public UserDTO find(UUID userId) {
     return userRepository.findById(userId)
-        .map(user -> toUserDTO(user))
+        .map(this::toUserDTO)
         .orElseThrow(() -> new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다."));
   }
 
@@ -77,37 +80,39 @@ public class BasicUserService implements UserService {
     String newEmail = userUpdateRequest.newEmail();
     String newPassword = userUpdateRequest.newPassword();
 
-    if (newUsername != null) {
-      if (userRepository.existByUsername(newUsername)) { // username 중복 확인
+    if (newUsername != null && newUsername.equals(user.getUsername())) {
+      if (userRepository.existsByUsername(newUsername)) { // username 중복 확인
         throw new IllegalArgumentException(newUsername + " 사용자가 이미 존재합니다.");
       }
     }
 
-    if (newEmail != null) {
-      if (userRepository.existByEmail(newEmail)) {
+    if (newEmail != null && newEmail.equals(user.getEmail())) {
+      if (userRepository.existsByEmail(newEmail)) {
         throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
       }
     }
 
-    UUID profileId = user.getProfileId();
+    BinaryContent newProfile = null;
 
     if (profileCreateRequest.isPresent()) {
       BinaryContentCreateRequest profileRequest = profileCreateRequest.get();
-      Optional.ofNullable(user.getProfileId()).ifPresent(binaryContentRepository::deleteById);
+      if (user.getProfile() != null) {
+        binaryContentRepository.delete(user.getProfile());
+      }
 
       byte[] bytes = profileRequest.bytes();
-      BinaryContent binaryContent = new BinaryContent(
+      newProfile = new BinaryContent(
           profileRequest.fileName(),
           (long) bytes.length,
           profileRequest.contentType(),
-          bytes
+          profileRequest.bytes()
       );
 
-      profileId = binaryContentRepository.save(binaryContent).getId();
+      binaryContentRepository.save(newProfile);
     }
 
-    user.update(newUsername, newEmail, newPassword, profileId);
-    return userRepository.save(user);
+    user.update(newUsername, newEmail, newPassword, newProfile);
+    return user;
   }
 
   @Override
@@ -115,23 +120,15 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다."));
 
-    Optional.ofNullable(user.getProfileId())
-        .ifPresent(binaryContentRepository::deleteById);
-
-    // 유저를 지우기 위해서 프로필 지우고 userStatus 지우기
-    userStatusRepository.deleteByUserId(userId);
-
     userRepository.deleteById(userId);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<UserDTO> findAll() {
-    List<UserDTO> list = new ArrayList<>();
-    for (User user : userRepository.findAll()) {
-      UserDTO userDTO = toUserDTO(user);
-      list.add(userDTO);
-    }
-    return list;
+    return userRepository.findAll().stream()
+        .map(user -> toUserDTO(user))
+        .toList();
   }
 
   private UserDTO toUserDTO(User user) {

@@ -15,4 +15,7 @@ public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
   List<ReadStatus> findAllByUserId(UUID userId);
 
   List<ReadStatus> findAllByChannelId(UUID channelId);
+
+  // 내가 어떤 채널을 읽은 읾은 상태가 존재하는지 그렇지 않은지
+  boolean existsByUserIdAndChannelId(UUID userId, UUID channelId);
 }

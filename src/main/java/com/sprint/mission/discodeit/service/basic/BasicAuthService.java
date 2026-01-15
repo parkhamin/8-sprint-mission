@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class BasicAuthService implements AuthService {
 
   private final UserRepository userRepository;
 
+  @Transactional(readOnly = true)
   @Override
   public User login(LoginRequest loginRequest) {
     String username = loginRequest.username();

@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.request.UserStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -13,9 +14,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BasicUserStatusService implements UserStatusService {
 
   private final UserStatusRepository userStatusRepository;
@@ -23,59 +26,59 @@ public class BasicUserStatusService implements UserStatusService {
 
   @Override
   public UserStatus create(UserStatusCreateRequest userStatusCreateRequest) {
-    UUID userId = userStatusCreateRequest.userId();
+    User user = userRepository.findById(userStatusCreateRequest.userId())
+        .orElseThrow(() -> new NoSuchElementException(
+            userStatusCreateRequest.userId() + " 사용자를 찾을 수 없습니다."));
     Instant lastActiveAt = userStatusCreateRequest.lastActiveAt();
 
-    if (!userRepository.existById(userId)) {
-      throw new IllegalArgumentException(userId + " 사용자를 찾을 수 없습니다.");
+    if (userStatusRepository.findByUserId(user.getId()).isPresent()) {
+      throw new IllegalArgumentException(user.getId() + "의 userStatus가 이미 존재합니다.");
     }
 
-    if (userStatusRepository.findByUserId(userId).isPresent()) {
-      throw new IllegalArgumentException(userId + "의 userStatus가 이미 존재합니다.");
-    }
-
-    UserStatus userStatus = new UserStatus(userId, lastActiveAt);
+    UserStatus userStatus = new UserStatus(user, lastActiveAt);
     return userStatusRepository.save(userStatus);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public UserStatus find(UUID userStatusId) {
     return userStatusRepository.findById(userStatusId)
         .orElseThrow(() -> new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다."));
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<UserStatus> findAll() {
-    return userStatusRepository.findAll().stream().toList();
+    return userStatusRepository.findAll();
   }
 
   @Override
   public UserStatus update(UUID userStatusId, UserStatusUpdateRequest userStatusUpdateRequest) {
-    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
-
     UserStatus userStatus = userStatusRepository.findById(userStatusId)
         .orElseThrow(() -> new NoSuchElementException(userStatusId + "UserStatus를 찾을 수 없습니다."));
 
+    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
+
     userStatus.update(newLastActiveAt);
-    return userStatusRepository.save(userStatus);
+    return userStatus;
   }
 
   @Override
   public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest) {
-    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
-
     UserStatus userStatus = userStatusRepository.findByUserId(userId)
         .orElseThrow(() -> new NoSuchElementException(userId + "사용자를 찾을 수 없습니다."));
 
+    Instant newLastActiveAt = userStatusUpdateRequest.newLastActiveAt();
+
     userStatus.update(newLastActiveAt);
-    return userStatusRepository.save(userStatus);
+    return userStatus;
   }
 
   @Override
   public void delete(UUID userStatusId) {
-    if (!userStatusRepository.existsById(userStatusId)) {
-      throw new NoSuchElementException(userStatusId + " UserStatus를 찾을 수 없습니다.");
-    }
+    UserStatus userStatus = userStatusRepository.findById(userStatusId)
+        .orElseThrow(() -> new NoSuchElementException(userStatusId + "UserStatus를 찾을 수 없습니다."));
+
     userStatusRepository.deleteById(userStatusId);
   }
 }

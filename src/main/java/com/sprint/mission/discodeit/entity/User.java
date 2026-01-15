@@ -42,7 +42,7 @@ public class User extends BaseUpdatableEntity {
 
   @JsonManagedReference
   @Setter(AccessLevel.PROTECTED)
-  @OneToOne(mappedBy = "user")
+  @OneToOne(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
   private UserStatus status;
 
   public User(String username, String email, String password, BinaryContent profile) {

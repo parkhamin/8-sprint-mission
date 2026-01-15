@@ -46,7 +46,10 @@ public class Message extends BaseUpdatableEntity {
     this.content = content;
     this.channel = channel;
     this.author = author;
-    this.attachments = attachments;
+    // NULL이 들어올 경우 방어
+    if (attachments != null) {
+      this.attachments = attachments;
+    }
   }
 
   public void update(String newContent) {
