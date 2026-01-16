@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "BinaryContent Controller", description = "첨부파일 API입니다.")
@@ -32,4 +33,10 @@ public interface BinaryContentApi {
   })
   ResponseEntity<List<BinaryContentDto>> findAllByIdIn(
       @Parameter(description = "조회할 첨부파일 Id 목록") List<UUID> binaryContentIds);
+
+  @Operation(summary = "첨부파일 다운로드")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "첨부파일 다운로드 성공", content = @Content(schema = @Schema(implementation = Resource.class)))
+  })
+  ResponseEntity<?> download(@Parameter(description = "다운로드 할 파일 Id") UUID binaryContentId);
 }

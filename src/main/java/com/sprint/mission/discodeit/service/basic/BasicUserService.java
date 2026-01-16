@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -30,6 +31,7 @@ public class BasicUserService implements UserService {
   private final BinaryContentRepository binaryContentRepository;
   private final UserStatusRepository userStatusRepository;
   private final UserMapper userMapper;
+  private final BinaryContentStorage binaryContentStorage;
 
   @Transactional
   @Override
@@ -53,8 +55,10 @@ public class BasicUserService implements UserService {
           String contentType = profileRequest.contentType();
           byte[] bytes = profileRequest.bytes();
           BinaryContent binaryContent = new BinaryContent(fileName, (long) bytes.length,
-              contentType, bytes);
-          return binaryContentRepository.save(binaryContent);
+              contentType);
+          binaryContentRepository.save(binaryContent);
+          binaryContentStorage.put(binaryContent.getId(), bytes);
+          return binaryContent;
         })
         .orElse(null);
 
@@ -84,16 +88,12 @@ public class BasicUserService implements UserService {
     String newEmail = userUpdateRequest.newEmail();
     String newPassword = userUpdateRequest.newPassword();
 
-    if (newUsername != null && newUsername.equals(user.getUsername())) {
-      if (userRepository.existsByUsername(newUsername)) { // username 중복 확인
-        throw new IllegalArgumentException(newUsername + " 사용자가 이미 존재합니다.");
-      }
+    if (userRepository.existsByUsername(newUsername)) { // username 중복 확인
+      throw new IllegalArgumentException(newUsername + " 사용자가 이미 존재합니다.");
     }
 
-    if (newEmail != null && newEmail.equals(user.getEmail())) {
-      if (userRepository.existsByEmail(newEmail)) {
-        throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
-      }
+    if (userRepository.existsByEmail(newEmail)) {
+      throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
     }
 
     BinaryContent newProfile = null;
@@ -108,11 +108,11 @@ public class BasicUserService implements UserService {
       newProfile = new BinaryContent(
           profileRequest.fileName(),
           (long) bytes.length,
-          profileRequest.contentType(),
-          profileRequest.bytes()
+          profileRequest.contentType()
       );
 
       binaryContentRepository.save(newProfile);
+      binaryContentStorage.put(newProfile.getId(), bytes);
     }
 
     user.update(newUsername, newEmail, newPassword, newProfile);
