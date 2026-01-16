@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller.api;
 import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -55,8 +56,9 @@ public interface MessageApi {
 
   @Operation(summary = "특정 채널의 메시지 목록 조회")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "메시지 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MessageDto.class))))
+      @ApiResponse(responseCode = "200", description = "메시지 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PageResponse.class))))
   })
-  ResponseEntity<List<MessageDto>> findAllByChannelId(
-      @Parameter(description = "조회할 채널 Id") UUID channelId);
+  ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
+      @Parameter(description = "조회할 채널 Id") UUID channelId,
+      @Parameter(description = "조회할 페이지") int page);
 }

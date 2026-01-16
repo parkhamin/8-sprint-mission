@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.service.MessageService;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,9 +79,12 @@ public class MessageController implements MessageApi {
   // 특정 채널의 메시지 목록을 조회할 수 있다
   // List<Message> findAllByChannelId(UUID channelId);
   @GetMapping
-  public ResponseEntity<List<MessageDto>> findAllByChannelId(
-      @RequestParam("channelId") UUID channelId) {
-    List<MessageDto> messages = messageService.findAllByChannelId(channelId);
+  public ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
+      @RequestParam("channelId") UUID channelId,
+      @RequestParam(value = "page", defaultValue = "0") int page
+  ) {
+    PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, page);
+
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(messages);
