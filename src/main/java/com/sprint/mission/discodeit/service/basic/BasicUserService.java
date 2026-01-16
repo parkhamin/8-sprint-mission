@@ -1,34 +1,39 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
-import com.sprint.mission.discodeit.dto.UserDTO;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import java.time.Instant;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
   private final UserStatusRepository userStatusRepository;
+  private final UserMapper userMapper;
 
+  @Transactional
   @Override
-  public User create(UserCreateRequest userCreateRequest,
+  public UserDto create(UserCreateRequest userCreateRequest,
       Optional<BinaryContentCreateRequest> profileCreateRequest) {
     String username = userCreateRequest.username();
     String email = userCreateRequest.email();
@@ -54,24 +59,23 @@ public class BasicUserService implements UserService {
         .orElse(null);
 
     User user = new User(username, email, password, profile);
-    User createdUser = userRepository.save(user);
+    UserStatus userStatus = new UserStatus(user, Instant.now());
 
-    UserStatus userStatus = new UserStatus(createdUser, Instant.now());
-    userStatusRepository.save(userStatus);
+    userRepository.save(user);
 
-    return createdUser;
+    return userMapper.toDto(user);
   }
 
-  @Transactional(readOnly = true)
   @Override
-  public UserDTO find(UUID userId) {
+  public UserDto find(UUID userId) {
     return userRepository.findById(userId)
-        .map(this::toUserDTO)
+        .map(userMapper::toDto)
         .orElseThrow(() -> new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다."));
   }
 
+  @Transactional
   @Override
-  public User update(UUID userId, UserUpdateRequest userUpdateRequest,
+  public UserDto update(UUID userId, UserUpdateRequest userUpdateRequest,
       Optional<BinaryContentCreateRequest> profileCreateRequest) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다."));
@@ -112,9 +116,10 @@ public class BasicUserService implements UserService {
     }
 
     user.update(newUsername, newEmail, newPassword, newProfile);
-    return user;
+    return userMapper.toDto(user);
   }
 
+  @Transactional
   @Override
   public void delete(UUID userId) {
     User user = userRepository.findById(userId)
@@ -123,19 +128,10 @@ public class BasicUserService implements UserService {
     userRepository.deleteById(userId);
   }
 
-  @Transactional(readOnly = true)
   @Override
-  public List<UserDTO> findAll() {
+  public List<UserDto> findAll() {
     return userRepository.findAll().stream()
-        .map(user -> toUserDTO(user))
+        .map(userMapper::toDto)
         .toList();
-  }
-
-  private UserDTO toUserDTO(User user) {
-    Boolean online = userStatusRepository.findByUserId(user.getId())
-        .map(userStatus -> userStatus.isOnline())
-        .orElse(false);
-
-    return UserDTO.fromEntity(user, online);
   }
 }

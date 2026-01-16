@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.controller.api;
 
+import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
-import com.sprint.mission.discodeit.entity.Message;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -23,10 +23,10 @@ public interface MessageApi {
 
   @Operation(summary = "메시지 생성")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "메시지 생성 성공", content = @Content(schema = @Schema(implementation = Message.class))),
+      @ApiResponse(responseCode = "201", description = "메시지 생성 성공", content = @Content(schema = @Schema(implementation = MessageDto.class))),
       @ApiResponse(responseCode = "404", description = "채널 또는 사용자 조회 불가", content = @Content(examples = @ExampleObject(value = "{channelId | authorId} 채널, 사용자(을/를) 찾을 수 없습니다.")))
   })
-  ResponseEntity<Message> create(
+  ResponseEntity<MessageDto> create(
       @Parameter(
           description = "Message 생성 정보",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
@@ -38,10 +38,10 @@ public interface MessageApi {
 
   @Operation(summary = "메시지 수정")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "메시지 수정 성공", content = @Content(schema = @Schema(implementation = Message.class))),
+      @ApiResponse(responseCode = "200", description = "메시지 수정 성공", content = @Content(schema = @Schema(implementation = MessageDto.class))),
       @ApiResponse(responseCode = "404", description = "메시지 조회 불가", content = @Content(examples = @ExampleObject(value = "{messageId} 메시지를 찾을 수 없습니다.")))
   })
-  ResponseEntity<Message> update(
+  ResponseEntity<MessageDto> update(
       @Parameter(description = "수정할 메시지 Id") UUID messageId,
       @Parameter(description = "수정할 메시지 내용") MessageUpdateRequest messageUpdateRequest
   );
@@ -55,8 +55,8 @@ public interface MessageApi {
 
   @Operation(summary = "특정 채널의 메시지 목록 조회")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "메시지 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Message.class))))
+      @ApiResponse(responseCode = "200", description = "메시지 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MessageDto.class))))
   })
-  ResponseEntity<List<Message>> findAllByChannelId(
+  ResponseEntity<List<MessageDto>> findAllByChannelId(
       @Parameter(description = "조회할 채널 Id") UUID channelId);
 }

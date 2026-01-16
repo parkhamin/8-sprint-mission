@@ -1,11 +1,10 @@
 package com.sprint.mission.discodeit.controller.api;
 
-import com.sprint.mission.discodeit.dto.UserDTO;
+import com.sprint.mission.discodeit.dto.UserDto;
+import com.sprint.mission.discodeit.dto.UserStatusDto;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,10 +25,10 @@ public interface UserApi {
 
   @Operation(summary = "사용자 생성")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "사용자 생성 성공", content = @Content(schema = @Schema(implementation = User.class))),
+      @ApiResponse(responseCode = "201", description = "사용자 생성 성공", content = @Content(schema = @Schema(implementation = UserDto.class))),
       @ApiResponse(responseCode = "400", description = "중복된 정보를 가진 사용자 이미 존재해서 생성 불가", content = @Content(examples = @ExampleObject(value = "사용자가 이미 존재합니다."))),
   })
-  ResponseEntity<User> create(
+  ResponseEntity<UserDto> create(
       @Parameter(
           description = "사용자 생성 정보",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
@@ -42,11 +41,11 @@ public interface UserApi {
 
   @Operation(summary = "사용자 정보 수정")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "사용자 정보 수정 성공", content = @Content(schema = @Schema(implementation = User.class))),
+      @ApiResponse(responseCode = "200", description = "사용자 정보 수정 성공", content = @Content(schema = @Schema(implementation = UserDto.class))),
       @ApiResponse(responseCode = "400", description = "중복된 정보를 가진 사용자 이미 존재해서 생성 불가", content = @Content(examples = @ExampleObject(value = "사용자가 이미 존재합니다."))),
       @ApiResponse(responseCode = "404", description = "사용자 조회 불가", content = @Content(examples = @ExampleObject(value = "{userId} 사용자를 찾을 수 없습니다.")))
   })
-  ResponseEntity<User> update(
+  ResponseEntity<UserDto> update(
       @Parameter(description = "수정할 사용자 Id") UUID userId,
       @Parameter(description = "수정할 사용자 정보") UserUpdateRequest userUpdateRequest,
       @Parameter(description = "수정할 사용자 프로필 이미지") MultipartFile profile
@@ -61,16 +60,16 @@ public interface UserApi {
 
   @Operation(summary = "사용자 목록 수정")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "사용자 정보 수정 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserDTO.class))))
+      @ApiResponse(responseCode = "200", description = "사용자 정보 수정 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserDto.class))))
   })
-  ResponseEntity<List<UserDTO>> findAll();
+  ResponseEntity<List<UserDto>> findAll();
 
   @Operation(summary = "사용자 접속 상태 정보 수정")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "사용자 접속 상태 정보 수정 성공", content = @Content(schema = @Schema(implementation = UserStatus.class))),
+      @ApiResponse(responseCode = "200", description = "사용자 접속 상태 정보 수정 성공", content = @Content(schema = @Schema(implementation = UserStatusDto.class))),
       @ApiResponse(responseCode = "404", description = "사용자 접속 상태 조회 불가", content = @Content(examples = @ExampleObject(value = "해당 사용자의 접속 정보를 찾을 수 없습니다.")))
   })
-  ResponseEntity<UserStatus> updateUserStatusByUserId(
+  ResponseEntity<UserStatusDto> updateUserStatusByUserId(
       @Parameter(description = "상태를 변경할 사용자 Id") UUID userId,
       @Parameter(description = "변경할 사용자 온라인 상태 정보") UserStatusUpdateRequest userStatusUpdateRequest
   );

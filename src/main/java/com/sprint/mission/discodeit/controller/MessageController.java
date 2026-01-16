@@ -1,10 +1,10 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.controller.api.MessageApi;
+import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.MessageService;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MessageController implements MessageApi {
   // 메시지를 보낼 수 있다.
   // Message create(MessageCreateRequest messageCreateRequest, List<BinaryContentCreateRequest> binaryContentCreateRequests);
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<Message> create(
+  public ResponseEntity<MessageDto> create(
       @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
   ) {
@@ -46,7 +46,7 @@ public class MessageController implements MessageApi {
             .toList() // 스트림을 List로 변환
         ).orElse(new ArrayList<>()); // 요청이 null일 경우 처리
 
-    Message message = messageService.create(messageCreateRequest, filesRequests);
+    MessageDto message = messageService.create(messageCreateRequest, filesRequests);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(message);
@@ -55,11 +55,11 @@ public class MessageController implements MessageApi {
   // 메시지를 수정할 수 있다.
   // Message update(UUID messageId, MessageUpdateRequest messageUpdateRequest);
   @PatchMapping(value = "/{messageId}")
-  public ResponseEntity<Message> update(
+  public ResponseEntity<MessageDto> update(
       @PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest messageUpdateRequest
   ) {
-    Message message = messageService.update(messageId, messageUpdateRequest);
+    MessageDto message = messageService.update(messageId, messageUpdateRequest);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(message);
@@ -78,9 +78,9 @@ public class MessageController implements MessageApi {
   // 특정 채널의 메시지 목록을 조회할 수 있다
   // List<Message> findAllByChannelId(UUID channelId);
   @GetMapping
-  public ResponseEntity<List<Message>> findAllByChannelId(
+  public ResponseEntity<List<MessageDto>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId) {
-    List<Message> messages = messageService.findAllByChannelId(channelId);
+    List<MessageDto> messages = messageService.findAllByChannelId(channelId);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(messages);
