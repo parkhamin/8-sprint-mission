@@ -19,5 +19,5 @@ public interface MessageService {
 
   void delete(UUID messageId);
 
-  PageResponse<MessageDto> findAllByChannelId(UUID channelId, int page);
+  PageResponse<MessageDto> findAllByChannelId(UUID channelId, UUID cursor, int size);
 }

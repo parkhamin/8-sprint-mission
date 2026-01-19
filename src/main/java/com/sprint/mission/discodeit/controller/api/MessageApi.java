@@ -60,5 +60,6 @@ public interface MessageApi {
   })
   ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
       @Parameter(description = "조회할 채널 Id") UUID channelId,
-      @Parameter(description = "조회할 페이지") int page);
+      @Parameter(description = "어디까지 읽었는지 판단할 책갈피") UUID cursor,
+      @Parameter(description = "조회할 메시지의 갯수") int size);
 }

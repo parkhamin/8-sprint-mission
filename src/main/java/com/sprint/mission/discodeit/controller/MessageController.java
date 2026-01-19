@@ -81,9 +81,10 @@ public class MessageController implements MessageApi {
   @GetMapping
   public ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId,
-      @RequestParam(value = "page", defaultValue = "0") int page
+      @RequestParam(value = "cursor", required = false) UUID cursor, // 'page' 대신 'cursor'
+      @RequestParam(value = "size", defaultValue = "50") int size
   ) {
-    PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, page);
+    PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, cursor, size);
 
     return ResponseEntity
         .status(HttpStatus.OK)

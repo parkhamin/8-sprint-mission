@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,11 +101,19 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, int page) {
-    Pageable pageable = PageRequest.of(page, 50, Sort.by(Sort.Direction.DESC, "id"));
+  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, UUID cursor, int size) {
+    Pageable pageable = PageRequest.of(0, size); // PageRequest가 Slice 반환 시 +1을 알아서 함
 
-    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, pageable);
+    // 1. Slice로 바로 받기
+    Slice<MessageDto> slice = messageRepository.findAllByCursor(channelId, cursor, pageable)
+        .map(messageMapper::toDto);
 
-    return pageResponseMapper.fromSlice(messageSlice.map(messageMapper::toDto));
+    // 2. 커서 추출
+    UUID nextCursor = slice.hasNext()
+        ? slice.getContent().get(slice.getContent().size() - 1).id()
+        : null;
+
+    // 3. 기존 매퍼 그대로 사용 가능 (빨간줄 해결!)
+    return pageResponseMapper.fromSlice(slice, nextCursor);
   }
 }

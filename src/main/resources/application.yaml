@@ -21,6 +21,7 @@ spring:
     database: Postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
+      open-in-view: false
       hibernate:
         format_sql: true
         highlight_sql: true
