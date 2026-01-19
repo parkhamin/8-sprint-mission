@@ -1,39 +1,14 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.MessageDto;
-import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.Message;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-@RequiredArgsConstructor
-public class MessageMapper {
+@Mapper(componentModel = "spring", uses = {BinaryContentMapper.class, UserMapper.class})
+public interface MessageMapper {
 
-  private final BinaryContentMapper binaryContentMapper;
-  private final UserMapper userMapper;
-
-  public MessageDto toDto(Message message) {
-    if (message == null) {
-      return null;
-    }
-
-    UserDto authorDto = userMapper.toDto(message.getAuthor());
-
-    List<BinaryContentDto> attachmentDtos = message.getAttachments().stream()
-        .map(binaryContentMapper::toDto)
-        .toList();
-
-    return new MessageDto(
-        message.getId(),
-        message.getCreatedAt(),
-        message.getUpdatedAt(),
-        message.getContent(),
-        message.getChannel().getId(),
-        authorDto,
-        attachmentDtos
-    );
-  }
+  // source(Message 엔티티에 있는 Channel 객체 안에 id 값)을 MessageDto 중 channelId 필드값에 꽂아줘.
+  @Mapping(target = "channelId", source = "channel.id")
+  MessageDto toDto(Message message);
 }

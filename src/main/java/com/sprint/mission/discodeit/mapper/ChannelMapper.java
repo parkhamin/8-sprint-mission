@@ -10,22 +10,30 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Component
-@RequiredArgsConstructor
-public class ChannelMapper {
+@Mapper(componentModel = "spring", uses = {UserMapper.class})
+public abstract class ChannelMapper {
 
-  private final MessageRepository messageRepository;
-  private final ReadStatusRepository readStatusRepository;
-  private final UserMapper userMapper;
+  @Autowired
+  private MessageRepository messageRepository;
 
-  public ChannelDto toDto(Channel channel) {
-    if (channel == null) {
-      return null;
-    }
+  @Autowired
+  private ReadStatusRepository readStatusRepository;
 
+  @Autowired
+  private UserMapper userMapper;
+
+  // MapStruct가 코드를 생성할 때, 내가 직접 만든 resolveParticipants(channel) 메서드를 호출해줘.
+  // 호출해서 반환값을 필드값으로 설정해줘.
+  // resolveLastMessageAt(channel)도 동일
+  @Mapping(target = "participants", expression = "java(getParticipants(channel))")
+  @Mapping(target = "lastMessageAt", expression = "java(getLastMessageAt(channel))")
+  abstract public ChannelDto toDto(Channel channel);
+
+  protected List<UserDto> getParticipants(Channel channel) {
     List<UserDto> participants = new ArrayList<>();
     if (channel.getType().equals(ChannelType.PRIVATE)) {
       participants = readStatusRepository.findAllByChannelId(channel.getId())
@@ -33,19 +41,13 @@ public class ChannelMapper {
           .map(readStatus -> userMapper.toDto(readStatus.getUser()))
           .toList();
     }
+    return participants;
+  }
 
-    Instant lastMessageAt = messageRepository.findTopByChannelIdOrderByCreatedAtDesc(
+  protected Instant getLastMessageAt(Channel channel) {
+    return messageRepository.findTopByChannelIdOrderByCreatedAtDesc(
             channel.getId())
         .map(Message::getCreatedAt)
         .orElse(Instant.now());
-
-    return new ChannelDto(
-        channel.getId(),
-        channel.getType(),
-        channel.getName(),
-        channel.getDescription(),
-        participants,
-        lastMessageAt
-    );
   }
 }
