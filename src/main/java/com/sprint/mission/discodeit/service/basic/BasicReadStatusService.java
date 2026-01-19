@@ -62,7 +62,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   public List<ReadStatusDto> findAllByUserId(UUID userId) {
-    return readStatusRepository.findAllByUserId(userId).stream()
+    return readStatusRepository.findAllByUserIdWithFetchJoin(userId).stream()
         .map(readStatusMapper::toDto)
         .toList();
   }

@@ -100,9 +100,6 @@ public class BasicUserService implements UserService {
 
     if (profileCreateRequest.isPresent()) {
       BinaryContentCreateRequest profileRequest = profileCreateRequest.get();
-      if (user.getProfile() != null) {
-        binaryContentRepository.delete(user.getProfile());
-      }
 
       byte[] bytes = profileRequest.bytes();
       newProfile = new BinaryContent(
@@ -130,7 +127,7 @@ public class BasicUserService implements UserService {
 
   @Override
   public List<UserDto> findAll() {
-    return userRepository.findAll().stream()
+    return userRepository.findAllWithProfileAndStatus().stream()
         .map(userMapper::toDto)
         .toList();
   }
