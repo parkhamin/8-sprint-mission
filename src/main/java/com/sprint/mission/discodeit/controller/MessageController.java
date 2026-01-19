@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -82,9 +85,14 @@ public class MessageController implements MessageApi {
   public ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId,
       @RequestParam(value = "cursor", required = false) UUID cursor, // 'page' 대신 'cursor'
-      @RequestParam(value = "size", defaultValue = "50") int size
+      @PageableDefault(
+          size = 50,
+          sort = "createdAt",
+          direction = Direction.DESC
+      ) Pageable pageable
   ) {
-    PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, cursor, size);
+    PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, cursor,
+        pageable);
 
     return ResponseEntity
         .status(HttpStatus.OK)

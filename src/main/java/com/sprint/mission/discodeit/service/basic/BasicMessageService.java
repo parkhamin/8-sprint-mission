@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -101,9 +100,8 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, UUID cursor, int size) {
-    Pageable pageable = PageRequest.of(0, size); // PageRequest가 Slice 반환 시 +1을 알아서 함
-
+  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, UUID cursor,
+      Pageable pageable) {
     // 1. Slice로 바로 받기
     Slice<MessageDto> slice = messageRepository.findAllByCursor(channelId, cursor, pageable)
         .map(messageMapper::toDto);

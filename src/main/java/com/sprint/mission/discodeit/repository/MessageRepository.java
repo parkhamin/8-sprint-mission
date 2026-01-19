@@ -12,11 +12,10 @@ import org.springframework.data.repository.query.Param;
 public interface MessageRepository extends JpaRepository<Message, UUID> {
 
   @Query("SELECT m FROM Message m " +
-      "JOIN FETCH m.author " + // N+1 예방을 위한 Fetch Join
+      "JOIN FETCH m.author " +
       "JOIN FETCH m.channel " +
       "WHERE m.channel.id = :channelId " +
-      "AND (:cursor IS NULL OR m.id < :cursor) " +
-      "ORDER BY m.id DESC")
+      "AND (:cursor IS NULL OR m.id < :cursor)")
   Slice<Message> findAllByCursor(@Param("channelId") UUID channelId,
       @Param("cursor") UUID cursor,
       Pageable pageable);
