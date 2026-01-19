@@ -32,7 +32,7 @@ discodeit:
   storage:
     type: local
     local:
-      root-path: .discodeit
+      root-path: .discodeit/storage
 
 logging:
   level:
