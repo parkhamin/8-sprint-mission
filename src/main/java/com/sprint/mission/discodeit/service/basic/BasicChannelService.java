@@ -45,7 +45,7 @@ public class BasicChannelService implements ChannelService {
   @Transactional
   @Override
   public ChannelDto create(PrivateChannelCreateRequest channelCreateRequest) {
-    Channel channel = new Channel(ChannelType.PRIVATE, null, null);
+    Channel channel = new Channel(ChannelType.PRIVATE);
     channelRepository.save(channel);
 
     List<ReadStatus> readStatusList = userRepository.findAllById(

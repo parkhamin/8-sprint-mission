@@ -7,7 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,6 +30,10 @@ public class Channel extends BaseUpdatableEntity {
     this.type = type;
     this.name = name;
     this.description = description;
+  }
+
+  public Channel(ChannelType type) {
+    this(type, null, null);
   }
 
   public void update(String newName, String newDescription) {
