@@ -1,3 +1,16 @@
+-- 1. 가장 하위 자식 테이블 (관계 매핑 테이블)
+DROP TABLE IF EXISTS message_attachments;
+
+-- 2. 외래 키로 다른 테이블을 참조하고 있는 테이블들
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS read_statuses;
+DROP TABLE IF EXISTS user_statuses;
+
+-- 3. 더 이상 자식이 없는 부모 테이블들
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS channels;
+DROP TABLE IF EXISTS binary_contents;
+
 CREATE TABLE channels
 (
     id          uuid PRIMARY KEY,

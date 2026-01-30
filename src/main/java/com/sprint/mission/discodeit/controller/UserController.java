@@ -42,10 +42,7 @@ public class UserController implements UserApi {
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
-    Optional<BinaryContentCreateRequest> profileCreateRequest =
-        Optional.ofNullable(profile)
-            .filter(p -> !p.isEmpty())
-            .map(BinaryContentCreateRequest::fileFromRequest);
+    Optional<BinaryContentCreateRequest> profileCreateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.create(userCreateRequest, profileCreateRequest);
     return ResponseEntity
@@ -61,10 +58,7 @@ public class UserController implements UserApi {
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
-    Optional<BinaryContentCreateRequest> profileUpdateRequest =
-        Optional.ofNullable(profile)
-            .filter(p -> !p.isEmpty())
-            .map(BinaryContentCreateRequest::fileFromRequest);
+    Optional<BinaryContentCreateRequest> profileUpdateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.update(userId, userUpdateRequest, profileUpdateRequest);
     return ResponseEntity
@@ -103,5 +97,11 @@ public class UserController implements UserApi {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(userStatus);
+  }
+
+  Optional<BinaryContentCreateRequest> toBinaryContentRequest(MultipartFile profile) {
+    return Optional.ofNullable(profile)
+        .filter(p -> !p.isEmpty())
+        .map(BinaryContentCreateRequest::fileFromRequest);
   }
 }

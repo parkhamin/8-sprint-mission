@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +20,8 @@ public class UserStatus extends BaseUpdatableEntity {
 
   private static final long ONLINE_THRESHOLD_SECONDS = 300L;
 
-  @JsonBackReference
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", unique = true)
+  @JoinColumn(name = "user_id", unique = true, nullable = false)
   private User user;
 
   @Column(name = "last_active_at", nullable = false)

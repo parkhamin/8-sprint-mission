@@ -25,10 +25,7 @@ public abstract class ChannelMapper {
 
   @Autowired
   private UserMapper userMapper;
-
-  // MapStruct가 코드를 생성할 때, 내가 직접 만든 resolveParticipants(channel) 메서드를 호출해줘.
-  // 호출해서 반환값을 필드값으로 설정해줘.
-  // resolveLastMessageAt(channel)도 동일
+  
   @Mapping(target = "participants", expression = "java(getParticipants(channel))")
   @Mapping(target = "lastMessageAt", expression = "java(getLastMessageAt(channel))")
   abstract public ChannelDto toDto(Channel channel);
