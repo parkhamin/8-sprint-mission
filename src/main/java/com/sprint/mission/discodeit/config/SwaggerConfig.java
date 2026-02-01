@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
     info = @Info(title = "Discodeit API 명세서",
         description = "Discodeit API 명세서입니다.",
-        version = "v1"
+        version = "v1.2"
     )
 )
 
