@@ -21,3 +21,7 @@ discodeit:
     type: local
     local:
       root-path: .discodeit/storage
+
+logging:
+  level:
+    com.sprint.mission.discodeit: info

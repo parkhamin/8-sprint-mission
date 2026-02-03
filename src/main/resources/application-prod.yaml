@@ -20,6 +20,7 @@ spring:
 
 logging:
   level:
+    com.sprint.mission.discodeit: info
     org.hibernate.SQL: info
     org.hibernate.orm.jdbc.bind: info
 
