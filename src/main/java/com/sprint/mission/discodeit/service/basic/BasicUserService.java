@@ -7,15 +7,17 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.exception.user.UserEmailAlreadyExistsException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UsernameAlreadyExistsException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +33,6 @@ public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
   private final BinaryContentRepository binaryContentRepository;
-  private final UserStatusRepository userStatusRepository;
   private final UserMapper userMapper;
   private final BinaryContentStorage binaryContentStorage;
 
@@ -47,12 +48,12 @@ public class BasicUserService implements UserService {
 
     if (userRepository.existsByUsername(username)) { // username 중복 확인
       log.warn("[UserService] 사용자 생성 실패 - 중복된 이름: {}", username);
-      throw new IllegalArgumentException(username + " 사용자가 이미 존재합니다.");
+      throw new UsernameAlreadyExistsException(username);
     }
 
     if (userRepository.existsByEmail(email)) {
       log.warn("[UserService] 사용자 생성 실패 - 중복된 이메일: {}", email);
-      throw new IllegalArgumentException(email + " 사용자가 이미 존재합니다.");
+      throw new UserEmailAlreadyExistsException(email);
     }
 
     BinaryContent profile = profileCreateRequest
@@ -71,7 +72,7 @@ public class BasicUserService implements UserService {
           } catch (Exception e) {
             log.error("[UserService] 프로필 이미지 스토리지 저장 실패 - 파일명: {}, 원인: {}",
                 profileRequest.fileName(), e.getMessage());
-            throw e;
+            throw new BinaryContentSaveFailedException(binaryContent.getId(), fileName);
           }
           return binaryContent;
         })
@@ -94,7 +95,7 @@ public class BasicUserService implements UserService {
         .map(userMapper::toDto)
         .orElseThrow(() -> {
           log.warn("[UserService] 사용자 조회 실패- 존재하지 않는 Id: {}", userId);
-          return new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다.");
+          return new UserNotFoundException(userId);
         });
   }
 
@@ -107,7 +108,7 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> {
           log.warn("[UserService] 사용자 수정 실패 - 존재하지 않는 Id: {}", userId);
-          return new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다.");
+          return new UserNotFoundException(userId);
         });
 
     String newUsername = userUpdateRequest.newUsername();
@@ -116,12 +117,12 @@ public class BasicUserService implements UserService {
 
     if (userRepository.existsByUsername(newUsername)) { // username 중복 확인
       log.warn("[UserService] 사용자 수정 실패 - 중복된 이름: {}", newUsername);
-      throw new IllegalArgumentException(newUsername + " 사용자가 이미 존재합니다.");
+      throw new UsernameAlreadyExistsException(newUsername);
     }
 
     if (userRepository.existsByEmail(newEmail)) {
       log.warn("[UserService] 사용자 수정 실패 - 중복된 이메일: {}", newEmail);
-      throw new IllegalArgumentException(newEmail + " 사용자가 이미 존재합니다.");
+      throw new UserEmailAlreadyExistsException(newEmail);
     }
 
     BinaryContent newProfile = null;
@@ -145,7 +146,7 @@ public class BasicUserService implements UserService {
       } catch (Exception e) {
         log.error("[UserService] 프로필 이미지 스토리지 저장 실패 - 유저Id: {}, 원인: {}",
             userId, e.getMessage());
-        throw e;
+        throw new BinaryContentSaveFailedException(newProfile.getId(), newProfile.getFileName());
       }
     }
 
@@ -163,7 +164,7 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> {
           log.warn("[UserService] 사용자 삭제 실패 - 존재하지 않는 Id: {}", userId);
-          return new NoSuchElementException(userId + " 사용자를 찾을 수 없습니다.");
+          return new UserNotFoundException(userId);
         });
 
     userRepository.deleteById(userId);

@@ -23,6 +23,7 @@ public enum ErrorCode {
 
   // BinaryContent 관련
   BINARY_CONTENT_NOT_FOUND("바이너리 컨텐츠를 찾을 수 없습니다."),
+  BINARY_CONTENT_SAVE_FAILED("바이너리 컨텐츠를 저장하는 과정에서 오류가 발생했습니다."),
 
   // UserStatus 관련
   USER_STATUS_NOT_FOUND("사용자의 상태 정보를 찾을 수 없습니다."),

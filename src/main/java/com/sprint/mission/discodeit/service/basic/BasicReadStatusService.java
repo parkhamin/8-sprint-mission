@@ -6,6 +6,10 @@ import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusAlreadyExistsException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -13,7 +17,6 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,30 +37,28 @@ public class BasicReadStatusService implements ReadStatusService {
   @Transactional
   @Override
   public ReadStatusDto create(ReadStatusCreateRequest readStatusCreateRequest) {
-    log.info("[ReadStatusService] 읽음 상태 생성 시작 - 채널 Id: {}, 사용자 Id: {}",
-        readStatusCreateRequest.channelId(), readStatusCreateRequest.userId());
+    log.info("[ReadStatusService] 읽음 상태 생성 시작 - 사용자 Id: {}, 채널 Id: {}",
+        readStatusCreateRequest.userId(), readStatusCreateRequest.channelId());
 
     if (readStatusRepository.existsByUserIdAndChannelId(readStatusCreateRequest.userId(),
         readStatusCreateRequest.channelId())) {
       log.warn("[ReadStatusService] 읾음 상태 생성 실패 - 이미 존재하는 읽음 상태");
-      throw new IllegalArgumentException(
-          readStatusCreateRequest.userId() + "의 readStatus가 이미 존재합니다.");
+      throw new ReadStatusAlreadyExistsException(readStatusCreateRequest.userId(),
+          readStatusCreateRequest.channelId());
     }
 
     User user = userRepository.findById(readStatusCreateRequest.userId())
         .orElseThrow(() -> {
           log.warn("[ReadStatusService] 읽음 상태 생성 실패 - 존재하지 않는 사용자 Id: {}",
               readStatusCreateRequest.userId());
-          return new NoSuchElementException(
-              readStatusCreateRequest.userId() + " 사용자를 찾을 수 없습니다.");
+          return new UserNotFoundException(readStatusCreateRequest.userId());
         });
 
     Channel channel = channelRepository.findById(readStatusCreateRequest.channelId())
         .orElseThrow(() -> {
           log.warn("[ReadStatusService] 읽음 상태 생성 실패 - 존재하지 않는 채널 Id: {}",
               readStatusCreateRequest.channelId());
-          return new NoSuchElementException(
-              readStatusCreateRequest.channelId() + " 채널을 찾을 수 없습니다.");
+          return new ChannelNotFoundException(readStatusCreateRequest.channelId());
         });
     Instant lastReadAt = readStatusCreateRequest.lastReadAt();
 
@@ -76,7 +77,7 @@ public class BasicReadStatusService implements ReadStatusService {
         .map(readStatusMapper::toDto)
         .orElseThrow(() -> {
           log.warn("[ReadStatusService] 읽음 상태 조회 실패 - 존재하지 않는 Id: {}", readStatusId);
-          return new NoSuchElementException(readStatusId + " ReadStatus를 찾을 수 없습니다.");
+          return new ReadStatusNotFoundException(readStatusId);
         });
   }
 
@@ -98,7 +99,7 @@ public class BasicReadStatusService implements ReadStatusService {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
         .orElseThrow(() -> {
           log.warn("[ReadStatusService] 읽음 상태 수정 실패 - 존재하지 않는 Id: {}", readStatusId);
-          return new NoSuchElementException(readStatusId + " ReadStatus를 찾을 수 없습니다.");
+          return new ReadStatusNotFoundException(readStatusId);
         });
 
     readStatus.update(lastReadAt);
@@ -115,7 +116,7 @@ public class BasicReadStatusService implements ReadStatusService {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
         .orElseThrow(() -> {
           log.warn("[ReadStatusService] 읽음 상태 삭제 실패: 존재하지 않는 Id: {}", readStatusId);
-          return new NoSuchElementException(readStatusId + " ReadStatus를 찾을 수 없습니다.");
+          return new ReadStatusNotFoundException(readStatusId);
         });
 
     readStatusRepository.delete(readStatus);

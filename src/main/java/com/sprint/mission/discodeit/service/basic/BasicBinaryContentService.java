@@ -3,12 +3,13 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoundException;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     } catch (Exception e) {
       log.error("[BinaryContentService] 스토리지 저장 실패 - 이름: {}, 원인: {}", binaryContent.getId(),
           e.getMessage());
-      throw e;
+      throw new BinaryContentSaveFailedException(binaryContent.getId(), fileName);
     }
 
     log.info("[BinaryContentService] 파일 저장 완료 - Id: {}", binaryContent.getId());
@@ -64,7 +65,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         .orElseThrow(
             () -> {
               log.warn("[BinaryContentService] 파일 조회 실패 - 존재하지 않는 Id: {}", binaryContentId);
-              return new NoSuchElementException(binaryContentId + " BinaryContent를 찾을 수 없습니다.");
+              return new BinaryContentNotFoundException(binaryContentId);
             });
   }
 
@@ -87,7 +88,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     if (!binaryContentRepository.existsById(binaryContentId)) {
       log.warn("[BinaryContentService] 존재하지 않는 Id: {}", binaryContentId);
-      throw new NoSuchElementException(binaryContentId + " BinaryContent를 찾을 수 없습니다.");
+      throw new BinaryContentNotFoundException(binaryContentId);
     }
 
     binaryContentRepository.deleteById(binaryContentId);
