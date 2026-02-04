@@ -47,6 +47,7 @@ public class MessageController implements MessageApi {
     int fileCount = (attachments != null) ? attachments.size() : 0;
     log.info("[MessageController] 메시지 생성 요청 - 작성자 Id: {}, 파일: {}개", messageCreateRequest.authorId(),
         fileCount);
+
     List<BinaryContentCreateRequest> filesRequests = Optional.ofNullable(attachments)
         .map(files -> files.stream() // 요청들을 스트림화
             .map(BinaryContentCreateRequest::fileFromRequest)
@@ -67,6 +68,7 @@ public class MessageController implements MessageApi {
       @RequestBody MessageUpdateRequest messageUpdateRequest
   ) {
     log.info("[MessageController] 메시지 수정 요청 - Id: {}", messageId);
+
     MessageDto message = messageService.update(messageId, messageUpdateRequest);
 
     log.info("[MessageController] 메시지 수정 완료 - Id: {}", message.id());
@@ -78,6 +80,7 @@ public class MessageController implements MessageApi {
   @DeleteMapping(value = "/{messageId}")
   public ResponseEntity<Void> delete(@PathVariable UUID messageId) {
     log.info("[MessageController] 메시지 삭제 요청 - Id: {}", messageId);
+
     messageService.delete(messageId);
 
     log.info("[MessageController] 메시지 삭제 완료 - Id: {}", messageId);
@@ -97,6 +100,7 @@ public class MessageController implements MessageApi {
       ) Pageable pageable
   ) {
     log.info("[MessageController] 특정 채널의 메시지 목록 조회 요청 - 채널 Id: {}, cursor: {}", channelId, cursor);
+
     PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, cursor,
         pageable);
 

@@ -43,6 +43,7 @@ public class UserController implements UserApi {
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
     log.info("[UserController] 사용자 생성 요청 - 이름: {}", userCreateRequest.username());
+
     Optional<BinaryContentCreateRequest> profileCreateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.create(userCreateRequest, profileCreateRequest);
@@ -59,12 +60,13 @@ public class UserController implements UserApi {
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
-    log.info("[UserController] 사용자 정보 수정 요청 - Id: {}", userId);
+    log.info("[UserController] 사용자 수정 요청 - Id: {}", userId);
+
     Optional<BinaryContentCreateRequest> profileUpdateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.update(userId, userUpdateRequest, profileUpdateRequest);
 
-    log.info("[UserController] 사용자 정보 수정 완료 - Id: {}", user.id());
+    log.info("[UserController] 사용자 수정 완료 - Id: {}", user.id());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(user);
@@ -73,6 +75,7 @@ public class UserController implements UserApi {
   @DeleteMapping(value = "/{userId}")
   public ResponseEntity<Void> delete(@PathVariable UUID userId) {
     log.info("[UserController] 사용자 삭제 요청 - Id: {}", userId);
+
     userService.delete(userId);
 
     log.info("[UserController] 사용자 삭제 완료 - Id: {}", userId);
@@ -83,10 +86,11 @@ public class UserController implements UserApi {
 
   @GetMapping
   public ResponseEntity<List<UserDto>> findAll() {
-    log.info("[UserController] 사용자 목록 조회 요청");
+    log.info("[UserController] 전체 사용자 목록 조회 요청");
+
     List<UserDto> userDTOList = userService.findAll();
 
-    log.info("[UserController] 사용자 목록 조회 완료 - 목록 size: {}", userDTOList.size());
+    log.info("[UserController] 전체 사용자 목록 조회 완료 - 목록 size: {}", userDTOList.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(userDTOList);
@@ -98,6 +102,7 @@ public class UserController implements UserApi {
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest
   ) {
     log.info("[UserController] 사용자 온라인 상태 수정 요청 - 사용자 Id: {}", userId);
+
     UserStatusDto userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
 
     log.info("[UserController] 사용자 온라인 상태 수정 완료 - 상태 Id: {}", userStatus.id());

@@ -41,6 +41,7 @@ public class BinaryContentController implements BinaryContentApi {
   public ResponseEntity<List<BinaryContentDto>> findAllByIdIn(
       @RequestParam("binaryContentIds") List<UUID> binaryContentIds) {
     log.info("[BinaryContentController] 파일 조회 요청 - 요청 size: {}", binaryContentIds.size());
+
     List<BinaryContentDto> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);
 
     log.info("[BinaryContentController] 파일 조회 완료 - 결과 size: {}", binaryContents.size());
@@ -52,6 +53,7 @@ public class BinaryContentController implements BinaryContentApi {
   @GetMapping("{binaryContentId}/download")
   public ResponseEntity<?> download(@PathVariable UUID binaryContentId) {
     log.info("[BinaryContentController] 파일 다운로드 요청 - Id: {}", binaryContentId);
+
     BinaryContentDto binaryContentDto = binaryContentService.find(binaryContentId);
 
     log.info("[BinaryContentController] 파일 정보 확인 완료 - 이름: {}, 크기: {} bytes",

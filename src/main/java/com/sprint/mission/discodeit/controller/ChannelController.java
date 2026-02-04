@@ -34,6 +34,7 @@ public class ChannelController implements ChannelApi {
   public ResponseEntity<ChannelDto> create(
       @RequestBody PublicChannelCreateRequest channelCreateRequest) {
     log.info("[ChannelController] 공개 채널 생성 요청 - 이름: {}", channelCreateRequest.name());
+
     ChannelDto channel = channelService.create(channelCreateRequest);
 
     log.info("[ChannelController] 공개 채널 생성 완료 - Id: {}", channel.id());
@@ -46,6 +47,7 @@ public class ChannelController implements ChannelApi {
   public ResponseEntity<ChannelDto> create(
       @RequestBody PrivateChannelCreateRequest channelCreateRequest) {
     log.info("[ChannelController] 비공개 채널 생성 요청");
+
     ChannelDto channel = channelService.create(channelCreateRequest);
 
     log.info("[ChannelController] 비공개 채널 생성 완료 - Id: {}", channel.id());
@@ -60,6 +62,7 @@ public class ChannelController implements ChannelApi {
       @RequestBody PublicChannelUpdateRequest channelUpdateRequest
   ) {
     log.info("[ChannelController] 공개 채널 수정 요청 - Id: {}", channelId);
+
     ChannelDto channel = channelService.update(channelId, channelUpdateRequest);
 
     log.info("[ChannelController] 공개 채널 수정 완료 - Id: {}", channel.id());
@@ -71,6 +74,7 @@ public class ChannelController implements ChannelApi {
   @DeleteMapping(value = "/{channelId}")
   public ResponseEntity<Void> delete(@PathVariable UUID channelId) {
     log.info("[ChannelController] 채널 삭제 요청 - Id: {}", channelId);
+
     channelService.delete(channelId);
 
     log.info("[ChannelController] 채널 삭제 완료 - Id: {}", channelId);
@@ -82,6 +86,7 @@ public class ChannelController implements ChannelApi {
   @GetMapping
   public ResponseEntity<List<ChannelDto>> findAllByUserId(@RequestParam("userId") UUID userId) {
     log.info("[ChannelController] 특정 사용자가 볼 수 있는 채널 목록 조회 요청 - 사용자 Id: {}", userId);
+
     List<ChannelDto> channels = channelService.findAllByUserId(userId);
 
     log.info("[ChannelController] 특정 사용자가 볼 수 있는 채널 목록 조회 완료 - 채널 목록 size: {}", channels.size());
