@@ -40,11 +40,11 @@ public class BinaryContentController implements BinaryContentApi {
   @GetMapping
   public ResponseEntity<List<BinaryContentDto>> findAllByIdIn(
       @RequestParam("binaryContentIds") List<UUID> binaryContentIds) {
-    log.info("[BinaryContentController] 파일 조회 요청 - 요청 size: {}", binaryContentIds.size());
+    log.info("[BinaryContentController] 파일 조회 요청 - 요청 개수: {}개", binaryContentIds.size());
 
     List<BinaryContentDto> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);
 
-    log.info("[BinaryContentController] 파일 조회 완료 - 결과 size: {}", binaryContents.size());
+    log.info("[BinaryContentController] 파일 조회 완료 - 결과 개수: {}개", binaryContents.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContents);
