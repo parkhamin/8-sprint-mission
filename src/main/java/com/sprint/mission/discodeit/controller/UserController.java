@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -35,65 +37,70 @@ public class UserController implements UserApi {
   private final UserService userService;
   private final UserStatusService userStatusService;
 
-  // 사용자를 등록할 수 있다.
-  // User create(UserCreateRequest userCreateRequest, Optional<BinaryContentCreateRequest> profileCreateRequest);
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UserDto> create(
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
+    log.info("[UserController] 사용자 생성 요청 - 이름: {}", userCreateRequest.username());
     Optional<BinaryContentCreateRequest> profileCreateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.create(userCreateRequest, profileCreateRequest);
+
+    log.info("[UserController] 사용자 생성 완료 - Id: {}", user.id());
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(user);
   }
 
-  // 사용자 정보를 수정할 수 있다.
-  // User update(UUID userId, UserUpdateRequest userUpdateRequest, Optional<BinaryContentCreateRequest> profileUpdateRequest);
   @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UserDto> update(
       @PathVariable UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
+    log.info("[UserController] 사용자 정보 수정 요청 - Id: {}", userId);
     Optional<BinaryContentCreateRequest> profileUpdateRequest = toBinaryContentRequest(profile);
 
     UserDto user = userService.update(userId, userUpdateRequest, profileUpdateRequest);
+
+    log.info("[UserController] 사용자 정보 수정 완료 - Id: {}", user.id());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(user);
   }
 
-  // 사용자를 삭제할 수 있다.
-  // void delete(UUID userId);
   @DeleteMapping(value = "/{userId}")
   public ResponseEntity<Void> delete(@PathVariable UUID userId) {
+    log.info("[UserController] 사용자 삭제 요청 - Id: {}", userId);
     userService.delete(userId);
+
+    log.info("[UserController] 사용자 삭제 완료 - Id: {}", userId);
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)
         .build(); // 응답 바디가 없지만 ResponseEntity를 만들 때 build() 사용
   }
 
-  // 모든 사용자를 조회할 수 있다.
-  // List<UserDTO> findAll();
   @GetMapping
   public ResponseEntity<List<UserDto>> findAll() {
+    log.info("[UserController] 사용자 목록 조회 요청");
     List<UserDto> userDTOList = userService.findAll();
+
+    log.info("[UserController] 사용자 목록 조회 완료 - 목록 size: {}", userDTOList.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(userDTOList);
   }
 
-  // 사용자의 온라인 상태를 업데이트할 수 있다.
-  // UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest userStatusUpdateRequest);
   @PatchMapping(value = "/{userId}/userStatus")
   public ResponseEntity<UserStatusDto> updateUserStatusByUserId(
       @PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest userStatusUpdateRequest
   ) {
+    log.info("[UserController] 사용자 온라인 상태 수정 요청 - 사용자 Id: {}", userId);
     UserStatusDto userStatus = userStatusService.updateByUserId(userId, userStatusUpdateRequest);
+
+    log.info("[UserController] 사용자 온라인 상태 수정 완료 - 상태 Id: {}", userStatus.id());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(userStatus);
