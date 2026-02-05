@@ -1,10 +1,11 @@
 package com.sprint.mission.discodeit.dto.request;
 
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.UUID;
 
 public record PrivateChannelCreateRequest(
-    // 채널에 참가한 사람들
+    @NotEmpty(message = "참가자 목록은 비어있을 수 없습니다.")
     List<UUID> participantIds
 ) {
 

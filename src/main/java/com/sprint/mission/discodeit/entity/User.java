@@ -8,6 +8,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,12 +24,19 @@ import lombok.Setter;
 @AllArgsConstructor
 public class User extends BaseUpdatableEntity {
 
+  @NotBlank
+  @Size(min = 2, max = 50)
   @Column(name = "username", length = 50, nullable = false, unique = true)
   private String username;
 
+  @NotBlank
+  @Email
+  @Size(max = 100)
   @Column(name = "email", length = 100, nullable = false, unique = true)
   private String email;
 
+  @NotBlank
+  @Size(max = 60)
   @Column(name = "password", length = 60, nullable = false)
   private String password;
 

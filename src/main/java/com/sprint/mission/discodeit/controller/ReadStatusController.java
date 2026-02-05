@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.ReadStatusDto;
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.service.ReadStatusService;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class ReadStatusController implements ReadStatusApi {
 
   @PostMapping
   public ResponseEntity<ReadStatusDto> create(
-      @RequestBody ReadStatusCreateRequest readStatusCreateRequest) {
+      @Valid @RequestBody ReadStatusCreateRequest readStatusCreateRequest) {
     log.info("[ReadStatusController] 읽음 상태 생성 요청 - 채널 Id: {}, 사용자 Id: {}",
         readStatusCreateRequest.channelId(), readStatusCreateRequest.userId());
 
@@ -45,7 +46,7 @@ public class ReadStatusController implements ReadStatusApi {
   @PatchMapping(value = "/{readStatusId}")
   public ResponseEntity<ReadStatusDto> update(
       @PathVariable UUID readStatusId,
-      @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
+      @Valid @RequestBody ReadStatusUpdateRequest readStatusUpdateRequest) {
     log.info("[ReadStatusController] 읽음 상태 수정 요청 - Id: {}", readStatusId);
 
     ReadStatusDto readStatus = readStatusService.update(readStatusId, readStatusUpdateRequest);
