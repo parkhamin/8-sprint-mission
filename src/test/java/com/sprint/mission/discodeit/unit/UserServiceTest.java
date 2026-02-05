@@ -63,7 +63,7 @@ public class UserServiceTest {
   class UserCreateTests {
 
     @Test
-    @DisplayName("사용자 생성 성공")
+    @DisplayName("사용자 생성 성공인 경우")
     void create_shouldReturnUserDto() {
 
       // given
