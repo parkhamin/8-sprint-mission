@@ -2,15 +2,51 @@ package com.sprint.mission.discodeit.exception;
 
 import com.sprint.mission.discodeit.dto.response.ErrorResponse;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  // Bean Validation 실패 시 발생하는 예외 처리
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException ex) {
+    log.error("입력값 검증 실패 - @RequestBody 검증 오류: {}", ex.getMessage());
+
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+
+    Map<String, Object> fieldErrors = new HashMap<>();
+
+    // 필드별 오류 메시지 수집
+    ex.getBindingResult().getAllErrors().forEach(error -> {
+      if (error instanceof FieldError) {
+        FieldError fieldError = (FieldError) error;
+        fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+      } else {
+        fieldErrors.put("global", error.getDefaultMessage());
+      }
+    });
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        "VALIDATION_FAILED",
+        "입력 데이터 검증에 실패했습니다",
+        fieldErrors,
+        ex.getClass().getSimpleName(),
+        status.value()
+    );
+
+    return ResponseEntity.status(status).body(errorResponse);
+  }
 
   // 커스텀 예외 처리
   @ExceptionHandler(DiscodeitException.class)
