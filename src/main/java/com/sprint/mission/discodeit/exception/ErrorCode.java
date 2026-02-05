@@ -25,6 +25,7 @@ public enum ErrorCode {
   // BinaryContent 관련
   BINARY_CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "바이너리 컨텐츠를 찾을 수 없습니다."),
   BINARY_CONTENT_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "바이너리 컨텐츠를 저장하는 과정에서 오류가 발생했습니다."),
+  BINARY_CONTENT_CONVERT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 바이너리 컨텐츠로 변환하는 데 실패했습니다."),
 
   // UserStatus 관련
   USER_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자의 상태 정보를 찾을 수 없습니다."),
