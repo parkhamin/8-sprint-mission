@@ -1,9 +1,12 @@
+server:
+  port: 0
+
 spring:
   datasource:
-    url: jdbc:h2:mem:discodeitdb
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    username: test
+    password: test
 
   h2:
     console:
@@ -14,23 +17,12 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    defer-datasource-initialization: true
-
-  sql:
-    init:
-      mode: always
-      encoding: UTF-8
-
-  aop:
-    proxy-target-class: true
 
 logging:
   level:
+    root: info
     com.sprint.mission.discodeit: debug
+    org.springframework.test: info
     org.springframework.web: debug
     org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
-
+    org.junit: info
