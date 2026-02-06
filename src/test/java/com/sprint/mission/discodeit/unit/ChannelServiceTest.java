@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -59,10 +60,14 @@ public class ChannelServiceTest {
   private BasicChannelService basicChannelService;
 
   UUID channelId;
+  String name;
+  String description;
 
   @BeforeEach
   void setUp() {
     channelId = UUID.randomUUID();
+    name = "Test Channel";
+    description = "Test Description";
   }
 
   @Nested
@@ -74,9 +79,8 @@ public class ChannelServiceTest {
     void createPublicChannel_shouldReturnChannelDto() {
 
       // given
-      PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest("test",
-          "test channel");
-      ChannelDto publicDto = new ChannelDto(channelId, ChannelType.PUBLIC, "test", "test channel",
+      PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest(name, description);
+      ChannelDto publicDto = new ChannelDto(channelId, ChannelType.PUBLIC, name, description,
           List.of(), Instant.now());
 
       given(channelMapper.toDto(any(Channel.class))).willReturn(publicDto);
@@ -100,7 +104,7 @@ public class ChannelServiceTest {
 
       User user1 = mock(User.class);
       User user2 = mock(User.class);
-      given(userRepository.findAllById(participants)).willReturn(List.of(user1, user2));
+      given(userRepository.findAllById(eq(participants))).willReturn(List.of(user1, user2));
 
       List<UserDto> participantsDto = List.of(
           new UserDto(participants.get(0), "user1", "user1@naver.com", null, true),
@@ -118,7 +122,7 @@ public class ChannelServiceTest {
       assertThat(result).isEqualTo(privateDto);
 
       then(channelRepository).should().save(any(Channel.class));
-      then(userRepository).should().findAllById(participants);
+      then(userRepository).should().findAllById(eq(participants));
       then(readStatusRepository).should().saveAll(anyList());
     }
   }
@@ -134,12 +138,11 @@ public class ChannelServiceTest {
       // given
       PublicChannelUpdateRequest channelReq = new PublicChannelUpdateRequest("new channel name",
           "new description");
-      Channel mockChannel = new Channel(ChannelType.PUBLIC, "test", "test channel");
-      given(channelRepository.findById(channelId)).willReturn(Optional.of(mockChannel));
+      Channel mockChannel = new Channel(ChannelType.PUBLIC, name, description);
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(mockChannel));
 
       ChannelDto mockChannelDto = new ChannelDto(channelId, ChannelType.PUBLIC,
-          channelReq.newName(),
-          channelReq.newDescription(), List.of(), Instant.now());
+          channelReq.newName(), channelReq.newDescription(), List.of(), Instant.now());
       given(channelMapper.toDto(any(Channel.class))).willReturn(mockChannelDto);
 
       // when
@@ -148,7 +151,7 @@ public class ChannelServiceTest {
       // then
       assertThat(result).isEqualTo(mockChannelDto);
 
-      then(channelRepository).should().findById(channelId);
+      then(channelRepository).should().findById(eq(channelId));
     }
 
     @Test
@@ -158,7 +161,7 @@ public class ChannelServiceTest {
       PublicChannelUpdateRequest updateReq = new PublicChannelUpdateRequest("newName", "newDesc");
 
       Channel privateChannel = new Channel(ChannelType.PRIVATE);
-      given(channelRepository.findById(channelId)).willReturn(Optional.of(privateChannel));
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(privateChannel));
 
       // when & then
       assertThatThrownBy(() -> basicChannelService.update(channelId, updateReq))
@@ -175,16 +178,16 @@ public class ChannelServiceTest {
     void delete_shouldSuccess() {
 
       // given
-      given(channelRepository.existsById(channelId)).willReturn(true);
+      given(channelRepository.existsById(eq(channelId))).willReturn(true);
 
       // when
       basicChannelService.delete(channelId);
 
       // then
-      then(channelRepository).should().existsById(channelId);
-      then(messageRepository).should().deleteAllByChannelId(channelId);
-      then(readStatusRepository).should().deleteAllByChannelId(channelId);
-      then(channelRepository).should().deleteById(channelId);
+      then(channelRepository).should().existsById(eq(channelId));
+      then(messageRepository).should().deleteAllByChannelId(eq(channelId));
+      then(readStatusRepository).should().deleteAllByChannelId(eq(channelId));
+      then(channelRepository).should().deleteById(eq(channelId));
     }
 
     @Test
@@ -192,7 +195,7 @@ public class ChannelServiceTest {
     void delete_whenNotFoundChannel_shouldThrowException() {
 
       // given
-      given(channelRepository.existsById(channelId)).willReturn(false);
+      given(channelRepository.existsById(eq(channelId))).willReturn(false);
 
       // when & then
       assertThatThrownBy(() -> basicChannelService.delete(channelId))
@@ -210,7 +213,7 @@ public class ChannelServiceTest {
 
       // given
       Channel mockChannel = new Channel(ChannelType.PUBLIC, "test", "test channel");
-      given(channelRepository.findById(channelId)).willReturn(Optional.of(mockChannel));
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(mockChannel));
 
       ChannelDto mockChannelDto = new ChannelDto(channelId, ChannelType.PUBLIC,
           mockChannel.getName(), mockChannel.getDescription(), List.of(), Instant.now());
@@ -221,6 +224,8 @@ public class ChannelServiceTest {
 
       // then
       assertThat(result).isEqualTo(mockChannelDto);
+
+      then(channelRepository).should().findById(eq(channelId));
     }
 
     @Test
@@ -228,11 +233,13 @@ public class ChannelServiceTest {
     void findById_whenNotFoundChannel_shouldThrowException() {
 
       // given
-      given(channelRepository.findById(channelId)).willReturn(Optional.empty());
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.empty());
 
       // when & then
       assertThatThrownBy(() -> basicChannelService.find(channelId))
           .isInstanceOf(ChannelNotFoundException.class);
+
+      then(channelRepository).should().findById(eq(channelId));
     }
   }
 }

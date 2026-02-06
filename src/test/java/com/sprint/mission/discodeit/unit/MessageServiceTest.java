@@ -99,8 +99,8 @@ public class MessageServiceTest {
       // given
       MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
 
-      given(channelRepository.findById(channelId)).willReturn(Optional.of(mockChannel));
-      given(userRepository.findById(authorId)).willReturn(Optional.of(mockAuthor));
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(mockChannel));
+      given(userRepository.findById(eq(authorId))).willReturn(Optional.of(mockAuthor));
       given(messageMapper.toDto(any(Message.class))).willReturn(mockMessageDto);
 
       // when
@@ -119,8 +119,8 @@ public class MessageServiceTest {
       // given
       MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
 
-      given(channelRepository.findById(channelId)).willReturn(Optional.of(mockChannel));
-      given(userRepository.findById(authorId)).willReturn(Optional.empty());
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(mockChannel));
+      given(userRepository.findById(eq(authorId))).willReturn(Optional.empty());
 
       // when & then
       assertThatThrownBy(() -> basicMessageService.create(messageReq, List.of()))
@@ -140,7 +140,7 @@ public class MessageServiceTest {
 
       // given
       MessageUpdateRequest messageReq = new MessageUpdateRequest("새로운 안녕");
-      given(messageRepository.findById(messageId)).willReturn(Optional.of(mockMessage));
+      given(messageRepository.findById(eq(messageId))).willReturn(Optional.of(mockMessage));
 
       mockMessageDto = new MessageDto(messageId, Instant.now(), Instant.now(), "새로운 안녕", channelId,
           mockAuthorDto, List.of());
@@ -152,7 +152,7 @@ public class MessageServiceTest {
       // then
       assertThat(result).isEqualTo(mockMessageDto);
 
-      then(messageRepository).should().findById(messageId);
+      then(messageRepository).should().findById(eq(messageId));
     }
 
     @Test
@@ -161,7 +161,7 @@ public class MessageServiceTest {
 
       // given
       MessageUpdateRequest messageReq = new MessageUpdateRequest("새로운 안녕");
-      given(messageRepository.findById(messageId)).willReturn(Optional.empty());
+      given(messageRepository.findById(eq(messageId))).willReturn(Optional.empty());
 
       // when & then
       assertThatThrownBy(() -> basicMessageService.update(messageId, messageReq))
@@ -179,21 +179,21 @@ public class MessageServiceTest {
     @DisplayName("메시지 삭제 성공인 경우")
     void delete_shouldSuccess() {
       // given
-      given(messageRepository.findById(messageId)).willReturn(Optional.of(mockMessage));
+      given(messageRepository.findById(eq(messageId))).willReturn(Optional.of(mockMessage));
 
       // when
       basicMessageService.delete(messageId);
 
       // then
       then(messageRepository).should().delete(mockMessage);
-      then(messageRepository).should().findById(messageId);
+      then(messageRepository).should().findById(eq(messageId));
     }
 
     @Test
     @DisplayName("메시지 삭제 실패 - 메시지가 존재하지 않을 경우")
     void delete_whenNotFoundMessage_shouldThrowException() {
       // given
-      given(messageRepository.findById(messageId)).willReturn(Optional.empty());
+      given(messageRepository.findById(eq(messageId))).willReturn(Optional.empty());
 
       // when & then
       assertThatThrownBy(() -> basicMessageService.delete(messageId))
@@ -222,7 +222,8 @@ public class MessageServiceTest {
       Slice<Message> slice = new SliceImpl<>(messageList, pageable, true);
       List<MessageDto> dtoList = List.of(mockDto);
 
-      given(messageRepository.findAllByCursor(channelId, cursor, pageable)).willReturn(slice);
+      given(messageRepository.findAllByCursor(eq(channelId), eq(cursor), eq(pageable))).willReturn(
+          slice);
       given(messageMapper.toDto(mockMessage)).willReturn(mockDto);
 
       PageResponse<MessageDto> expectedResponse = new PageResponse<>(
@@ -252,7 +253,8 @@ public class MessageServiceTest {
       List<Message> messageList = Collections.emptyList();
       Slice<Message> slice = new SliceImpl<>(messageList, pageable, false);
 
-      given(messageRepository.findAllByCursor(channelId, cursor, pageable)).willReturn(slice);
+      given(messageRepository.findAllByCursor(eq(channelId), eq(cursor), eq(pageable))).willReturn(
+          slice);
 
       PageResponse<MessageDto> expectedResponse = new PageResponse<>(
           Collections.emptyList(),
