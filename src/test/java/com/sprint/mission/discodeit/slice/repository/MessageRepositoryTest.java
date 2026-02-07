@@ -135,7 +135,7 @@ public class MessageRepositoryTest {
 
   @Test
   @DisplayName("채널에 메시지가 없을 경우 Optinal.empty 반환")
-  void findTopByChannelIdOrderByCreatedAtDesc_shouldReturnsEmpty() {
+  void findTopByChannelIdOrderByCreatedAtDesc_ShouldReturnsEmpty() {
 
     // given
     messageRepository.deleteAllByChannelId(channel.getId());

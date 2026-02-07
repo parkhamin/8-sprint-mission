@@ -94,7 +94,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 생성 성공인 경우")
-    void create_shouldReturnMessageDto() {
+    void create_ShouldReturnMessageDto() {
 
       // given
       MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
@@ -114,7 +114,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 생성 실패 - 메시지를 보낸 사용자가 존재하지 않을 경우")
-    void create_whenNotFoundAuthor_shouldThrowException() {
+    void create_WhenNotFoundAuthor_ShouldThrowException() {
 
       // given
       MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
@@ -136,7 +136,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 수정 성공인 경우")
-    void update_shouldReturnMessageDto() {
+    void update_ShouldReturnMessageDto() {
 
       // given
       MessageUpdateRequest messageReq = new MessageUpdateRequest("새로운 안녕");
@@ -157,7 +157,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 수정 실패 - 메시지가 존재하지 않을 경우")
-    void update_whenMessageNotFound_shouldThrowException() {
+    void update_WhenMessageNotFound_ShouldThrowException() {
 
       // given
       MessageUpdateRequest messageReq = new MessageUpdateRequest("새로운 안녕");
@@ -177,7 +177,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 삭제 성공인 경우")
-    void delete_shouldSuccess() {
+    void delete_ShouldSuccess() {
       // given
       given(messageRepository.findById(eq(messageId))).willReturn(Optional.of(mockMessage));
 
@@ -191,7 +191,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("메시지 삭제 실패 - 메시지가 존재하지 않을 경우")
-    void delete_whenNotFoundMessage_shouldThrowException() {
+    void delete_WhenNotFoundMessage_ShouldThrowException() {
       // given
       given(messageRepository.findById(eq(messageId))).willReturn(Optional.empty());
 
@@ -209,7 +209,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("특정 채널의 메시지 목록 조회 성공인 경우")
-    void findByChannelId_shouldSuccess() {
+    void findByChannelId_ShouldSuccess() {
 
       // given
       UUID cursor = UUID.randomUUID();
@@ -246,7 +246,7 @@ public class MessageServiceTest {
 
     @Test
     @DisplayName("특정 채널의 메시지 목록 조회 실패 - 데이터가 없는 경우")
-    void findByChannelId_shouldFailed() {
+    void findByChannelId_ShouldFailed() {
       UUID cursor = UUID.randomUUID();
       Pageable pageable = PageRequest.of(0, 50);
 

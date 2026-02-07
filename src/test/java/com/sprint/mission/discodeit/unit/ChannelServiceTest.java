@@ -76,7 +76,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("공개 채널 생성 성공인 경우")
-    void createPublicChannel_shouldReturnChannelDto() {
+    void createPublicChannel_ShouldReturnChannelDto() {
 
       // given
       PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest(name, description);
@@ -96,7 +96,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("비공개 채널 생성 성공인 경우")
-    void createPrivateChannel_shouldReturnChannelDto() {
+    void createPrivateChannel_ShouldReturnChannelDto() {
 
       // given
       List<UUID> participants = List.of(UUID.randomUUID(), UUID.randomUUID());
@@ -133,7 +133,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("공개 채널 수정 성공인 경우")
-    void updatePublicChannel_shouldReturnChannelDto() {
+    void updatePublicChannel_ShouldReturnChannelDto() {
 
       // given
       PublicChannelUpdateRequest channelReq = new PublicChannelUpdateRequest("new channel name",
@@ -156,7 +156,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("채널 수정 실패 - 비공개 채널을 수정하는 경우")
-    void updatePrivateChannel_shouldThrowException() {
+    void updatePrivateChannel_ShouldThrowException() {
       // given
       PublicChannelUpdateRequest updateReq = new PublicChannelUpdateRequest("newName", "newDesc");
 
@@ -175,7 +175,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("채널 삭제 성공인 경우")
-    void delete_shouldSuccess() {
+    void delete_ShouldSuccess() {
 
       // given
       given(channelRepository.existsById(eq(channelId))).willReturn(true);
@@ -192,7 +192,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("채널 삭제 실패 - 채널을 찾지 못 했을 경우")
-    void delete_whenNotFoundChannel_shouldThrowException() {
+    void delete_WhenNotFoundChannel_shouldThrowException() {
 
       // given
       given(channelRepository.existsById(eq(channelId))).willReturn(false);
@@ -209,7 +209,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("공개 채널 조회 성공인 경우")
-    void findById_shouldReturnChannelDto() {
+    void findById_ShouldReturnChannelDto() {
 
       // given
       Channel mockChannel = new Channel(ChannelType.PUBLIC, "test", "test channel");
@@ -230,7 +230,7 @@ public class ChannelServiceTest {
 
     @Test
     @DisplayName("채널 조회 실패 - 채널을 찾지 못 했을 경우")
-    void findById_whenNotFoundChannel_shouldThrowException() {
+    void findById_WhenNotFoundChannel_ShouldThrowException() {
 
       // given
       given(channelRepository.findById(eq(channelId))).willReturn(Optional.empty());

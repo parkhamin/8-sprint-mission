@@ -85,7 +85,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 생성 성공인 경우")
-    void create_shouldReturnUserDto() {
+    void create_ShouldReturnUserDto() {
 
       // given
       UserCreateRequest userReq = new UserCreateRequest(username, email, password);
@@ -116,7 +116,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 생성 실패 - 중복된 이름인 경우")
-    void create_whenDuplicateName_shouldThrowException() {
+    void create_WhenDuplicateName_ShouldThrowException() {
 
       // given
       UserCreateRequest userReq = new UserCreateRequest(username, email, password);
@@ -141,7 +141,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 수정 성공 - 프로필 포함인 경우 ")
-    void update_shouldReturnUserDto() {
+    void update_ShouldReturnUserDto() {
 
       // given
       UserUpdateRequest userReq = new UserUpdateRequest("newTestUser", "newTestEmail@naver.com",
@@ -167,7 +167,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 수정 실패 - 사용자를 찾지 못 했을 경우")
-    void update_whenNotFoundUser_shouldThrowException() {
+    void update_WhenNotFoundUser_ShouldThrowException() {
 
       // given
       UserUpdateRequest userReq = new UserUpdateRequest("newTestUser", "newTestEmail@naver.com",
@@ -186,7 +186,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 삭제 성공인 경우")
-    void delete_shouldSuccess() {
+    void delete_ShouldSuccess() {
 
       // given
       given(userRepository.findById(eq(userId))).willReturn(Optional.of(mockUser));
@@ -201,7 +201,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("사용자 삭제 실패 - 사용자를 찾지 못 했을 경우")
-    void delete_whenNotFoundUser_shouldThrowException() {
+    void delete_WhenNotFoundUser_ShouldThrowException() {
 
       // given
       given(userRepository.findById(eq(userId))).willReturn(Optional.empty());

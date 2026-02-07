@@ -59,7 +59,7 @@ public class ChannelRepositoryTest {
 
   @Test
   @DisplayName("구독 채널이 없는 경우 공개 채널만 조회")
-  void findAllPublicOrSubscribed_shouldReturnPublicChannel() {
+  void findAllPublicOrSubscribed_ShouldReturnPublicChannel() {
 
     // when
     List<Channel> result = channelRepository.findAllPublicOrSubscribed(List.of());

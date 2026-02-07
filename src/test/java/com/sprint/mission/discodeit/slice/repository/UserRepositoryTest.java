@@ -103,7 +103,7 @@ public class UserRepositoryTest {
 
   @Test
   @DisplayName("데이터가 없을 경우 빈 리스트 반환")
-  void findAllWithProfileAndStatus_shouldReturnEmptyList() {
+  void findAllWithProfileAndStatus_ShouldReturnEmptyList() {
 
     // given
     userRepository.deleteAll();
