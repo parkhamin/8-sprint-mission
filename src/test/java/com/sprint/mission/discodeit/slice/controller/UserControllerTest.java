@@ -102,7 +102,7 @@ public class UserControllerTest {
 
   @Test
   @DisplayName("유효하지 않은 이메일 형식으로 등록 요청 시 400 에러가 발생해야 한다.")
-  void createUser_InValidRequest_BadRequests() throws Exception {
+  void createUser_InValidEmail_BadRequests() throws Exception {
 
     // given
     UserCreateRequest invalidUserReq = new UserCreateRequest("testUser", "wrong-email-format",
@@ -165,7 +165,7 @@ public class UserControllerTest {
 
   @Test
   @DisplayName("존재하지 않는 사용자 Id로 수정 요청 시 404 에러가 발생해야 한다.")
-  void updateUser_NonExistentId_NotFound() throws Exception {
+  void updateUser_UserNotFound_NotFound() throws Exception {
 
     // given
     UserUpdateRequest userReq = new UserUpdateRequest("updateTestUser", "test@naver.com",
