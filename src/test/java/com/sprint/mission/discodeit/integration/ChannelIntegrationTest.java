@@ -9,11 +9,15 @@ import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import java.time.Instant;
@@ -38,6 +42,12 @@ public class ChannelIntegrationTest {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private ReadStatusRepository readStatusRepository;
+
+  @Autowired
+  private MessageRepository messageRepository;
 
   @Autowired
   private ChannelService channelService;
@@ -90,8 +100,8 @@ public class ChannelIntegrationTest {
   void createPrivateChannel_TransactionCommit_Success() {
 
     // given
-    PrivateChannelCreateRequest channelReq = new PrivateChannelCreateRequest(
-        List.of(savedUser.getId(), savedUser2.getId()));
+    List<UUID> participants = List.of(savedUser.getId(), savedUser2.getId());
+    PrivateChannelCreateRequest channelReq = new PrivateChannelCreateRequest(participants);
 
     // when
     ChannelDto result = channelService.create(channelReq);
@@ -103,6 +113,9 @@ public class ChannelIntegrationTest {
 
     Channel channel = channelRepository.findById(result.id()).orElseThrow();
     assertThat(channel.getType()).isEqualTo(ChannelType.PRIVATE);
+
+    List<ReadStatus> readStatuses = readStatusRepository.findAllByChannelId(channel.getId());
+    assertThat(readStatuses).hasSize(2);
   }
 
   @Test
@@ -143,11 +156,18 @@ public class ChannelIntegrationTest {
   @DisplayName("채널 삭제 시 더 이상 조회되지 않아야 한다.")
   void deleteChannel_Success() {
 
+    // given
+    messageRepository.save(new Message("테스트", savedPublicChannel, savedUser, null));
+    readStatusRepository.save(new ReadStatus(savedUser, savedPublicChannel, Instant.now()));
+
     // when
     channelService.delete(savedPublicChannel.getId());
 
     // then
     assertThat(channelRepository.findById(savedPublicChannel.getId())).isEmpty();
+    assertThat(messageRepository.findTopByChannelIdOrderByCreatedAtDesc(
+        savedPublicChannel.getId())).isEmpty();
+    assertThat(readStatusRepository.findAllByChannelId(savedPublicChannel.getId())).isEmpty();
   }
 
   @Test
