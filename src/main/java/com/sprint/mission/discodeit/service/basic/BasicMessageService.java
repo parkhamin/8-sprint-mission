@@ -21,7 +21,9 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,17 +142,20 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, UUID cursor,
+  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, Instant createdAt,
       Pageable pageable) {
-    log.debug("[MessageService] 특정 채널의 메시지 목록 조회 시작 - 채널: {}, Cursor: {}, Size: {}",
-        channelId, cursor, pageable.getPageSize());
+    log.debug("[MessageService] 특정 채널의 메시지 목록 조회 시작 - 채널: {}, 생성 시간: {}, Size: {}",
+        channelId, createdAt, pageable.getPageSize());
 
-    Slice<MessageDto> slice = messageRepository.findAllByCursor(channelId, cursor, pageable)
+    Slice<MessageDto> slice = messageRepository.findAllByChannelIdWithAuthor(channelId,
+            Optional.ofNullable(createdAt).orElse(Instant.now()),
+            pageable)
         .map(messageMapper::toDto);
 
-    UUID nextCursor = slice.hasNext()
-        ? slice.getContent().get(slice.getContent().size() - 1).id()
-        : null;
+    Instant nextCursor = null;
+    if (!slice.getContent().isEmpty()) {
+      nextCursor = slice.getContent().get(slice.getContent().size() - 1).createdAt();
+    }
 
     log.info("[MessageService] 특정 채널의 메시지 목록 조회 완료 - 채널: {}, 결과 수: {}, NextCursor: {}",
         channelId, slice.getContent().size(), nextCursor);

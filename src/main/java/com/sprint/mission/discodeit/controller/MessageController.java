@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.service.MessageService;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -93,7 +94,7 @@ public class MessageController implements MessageApi {
   @GetMapping
   public ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId,
-      @RequestParam(value = "cursor", required = false) UUID cursor, // 'page' 대신 'cursor'
+      @RequestParam(value = "cursor", required = false) Instant cursor, // 'page' 대신 'cursor'
       @PageableDefault(
           size = 50,
           sort = "createdAt",

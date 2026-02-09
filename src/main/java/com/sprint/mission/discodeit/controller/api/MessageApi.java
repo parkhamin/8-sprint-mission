@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +62,6 @@ public interface MessageApi {
   })
   ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
       @Parameter(description = "조회할 채널 Id") UUID channelId,
-      @Parameter(description = "어디까지 읽었는지 판단할 책갈피") UUID cursor,
+      @Parameter(description = "어디까지 읽었는지 판단할 책갈피") Instant cursor,
       @Parameter(description = "페이지 정보") Pageable pageable);
 }
