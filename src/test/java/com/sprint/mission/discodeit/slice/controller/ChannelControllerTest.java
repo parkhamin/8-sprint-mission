@@ -18,7 +18,7 @@ import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
-import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import com.sprint.mission.discodeit.service.ChannelService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +42,7 @@ public class ChannelControllerTest {
   private ObjectMapper objectMapper;
 
   @MockitoBean
-  private BasicChannelService basicChannelService;
+  private ChannelService channelService;
 
   UUID channelId;
   UUID testUserId;
@@ -71,7 +71,7 @@ public class ChannelControllerTest {
     ChannelDto testChannelDto = new ChannelDto(channelId, ChannelType.PUBLIC, "update channel",
         "update channel Description", List.of(testUserDto, testUserDto2), Instant.now());
 
-    given(basicChannelService.update(any(), any())).willReturn(testChannelDto);
+    given(channelService.update(any(), any())).willReturn(testChannelDto);
 
     // when & then
     mockMvc.perform(patch("/api/channels/{channelId}", channelId)
@@ -82,7 +82,7 @@ public class ChannelControllerTest {
         .andExpect(jsonPath("$.name").value("update channel"))
         .andExpect(jsonPath("$.description").value("update channel Description"));
 
-    then(basicChannelService).should().update(eq(channelId), eq(channelReq));
+    then(channelService).should().update(eq(channelId), eq(channelReq));
   }
 
   @Test
@@ -93,7 +93,7 @@ public class ChannelControllerTest {
     UUID nonExistentChannelId = UUID.randomUUID();
     PublicChannelUpdateRequest channelReq = new PublicChannelUpdateRequest("update channel",
         "update channel Description");
-    given(basicChannelService.update(eq(nonExistentChannelId), any()))
+    given(channelService.update(eq(nonExistentChannelId), any()))
         .willThrow(new ChannelNotFoundException(nonExistentChannelId));
 
     // when & then
@@ -103,7 +103,7 @@ public class ChannelControllerTest {
         .andDo(print())
         .andExpect(status().isNotFound());
 
-    then(basicChannelService).should().update(eq(nonExistentChannelId), any());
+    then(channelService).should().update(eq(nonExistentChannelId), any());
   }
 
   @Test
@@ -115,7 +115,7 @@ public class ChannelControllerTest {
         .andDo(print())
         .andExpect(status().isNoContent());
 
-    then(basicChannelService).should().delete(eq(channelId));
+    then(channelService).should().delete(eq(channelId));
   }
 
   @Test
@@ -125,13 +125,13 @@ public class ChannelControllerTest {
     // given
     UUID nonExistentChannelId = UUID.randomUUID();
     willThrow(new ChannelNotFoundException(nonExistentChannelId))
-        .given(basicChannelService).delete(eq(nonExistentChannelId));
+        .given(channelService).delete(eq(nonExistentChannelId));
 
     // when & then
     mockMvc.perform(delete("/api/channels/{channelId}", nonExistentChannelId))
         .andDo(print())
         .andExpect(status().isNotFound());
 
-    then(basicChannelService).should().delete(eq(nonExistentChannelId));
+    then(channelService).should().delete(eq(nonExistentChannelId));
   }
 }

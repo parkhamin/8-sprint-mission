@@ -1,205 +1,202 @@
 package com.sprint.mission.discodeit.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.UserDto;
-import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
-import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import com.sprint.mission.discodeit.exception.user.UsernameAlreadyExistsException;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.storage.BinaryContentStorage;
-import java.time.Instant;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 @DisplayName("User 통합 테스트")
 public class UserIntegrationTest {
 
   @Autowired
-  private UserRepository userRepository;
+  private MockMvc mockMvc;
 
   @Autowired
-  private BinaryContentRepository binaryContentRepository;
+  private ObjectMapper objectMapper;
 
   @Autowired
   private UserService userService;
 
-  @MockitoBean
-  private BinaryContentStorage binaryContentStorage;
-
-  private User savedUser;
-
-  @BeforeEach
-  void setUp() {
-    BinaryContent profile = new BinaryContent("profile.png", 10L, "image/png");
-    binaryContentRepository.save(profile);
-
-    User user = new User("통합테스트회원", "integration@naver.com", "integration1234", profile);
-    new UserStatus(user, Instant.now());
-    savedUser = userRepository.save(user);
-  }
-
   @Test
-  @DisplayName("사용자 등록 시 트랜잭션이 올바르게 동작해야 한다.")
-  void createUser_TransactionCommit_Success() {
+  @DisplayName("사용자 생성 성공")
+  void createUser_Success() throws Exception {
 
     // given
-    BinaryContentCreateRequest profileReq = new BinaryContentCreateRequest("myProfile.png",
-        "image/png", new byte[]{1, 2, 3, 4, 5});
-    UserCreateRequest userReq = new UserCreateRequest("newUser", "new@naver.com", "new1234");
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "test@naver.com", "test1234");
 
-    // when
-    UserDto result = userService.create(userReq, Optional.of(profileReq));
+    MockMultipartFile userPart = new MockMultipartFile("userCreateRequest",
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(userReq));
 
-    // then
-    assertThat(result.username()).isEqualTo("newUser");
-    assertThat(result.email()).isEqualTo("new@naver.com");
-
-    User user = userRepository.findById(result.id()).orElseThrow();
-    assertThat(user.getUsername()).isEqualTo("newUser");
-    assertThat(user.getEmail()).isEqualTo("new@naver.com");
-
-    BinaryContent profile = binaryContentRepository.findById(result.profile().id()).orElseThrow();
-    assertThat(profile.getFileName()).isEqualTo("myProfile.png");
-
-    verify(binaryContentStorage, times(1)).put(
-        eq(user.getProfile().getId()), eq(profileReq.bytes()));
-  }
-
-  @Test
-  @DisplayName("스토리지에 프로필 저장 실패 시 트랜잭션이 롤백되어야 한다.")
-  void createUser_StorageFailed_TransactionRollback() {
-
-    // given
-    BinaryContentCreateRequest profileReq = new BinaryContentCreateRequest("myProfile.png",
-        "image/png", new byte[]{1, 2, 3, 4, 5});
-    UserCreateRequest userReq = new UserCreateRequest("newUser", "new@naver.com", "new1234");
-
-    doThrow(new RuntimeException()).when(binaryContentStorage).put(any(), any());
+    MockMultipartFile profilePart = new MockMultipartFile(
+        "profile",
+        "profile.png",
+        "image/png",
+        "profile".getBytes(StandardCharsets.UTF_8));
 
     // when & then
-    assertThatThrownBy(() ->
-        userService.create(userReq, Optional.of(profileReq)))
-        .isInstanceOf(BinaryContentSaveFailedException.class);
-
-    Optional<User> result = userRepository.findByUsername("newUser");
-    assertThat(result).isEmpty();
+    mockMvc.perform(multipart("/api/users")
+            .file(userPart)
+            .file(profilePart)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").exists())
+        .andExpect(jsonPath("$.username").value("testUser"))
+        .andExpect(jsonPath("$.email").value("test@naver.com"))
+        .andExpect(jsonPath("$.profile.fileName").value("profile.png"))
+        .andExpect(jsonPath("$.online").value(true));
   }
 
   @Test
-  @DisplayName("사용자 수정 시 반영되어야 한다.")
-  void updateUser_TransactionCommit_Success() {
+  @DisplayName("사용자 생성 실패")
+  void createUser_Failed() throws Exception {
 
     // given
-    UserUpdateRequest userReq = new UserUpdateRequest("updateUser", "update@naver.com",
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "no-email-format", "test1234");
+
+    MockMultipartFile userPart = new MockMultipartFile("userCreateRequest",
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(userReq));
+
+    // when & then
+    mockMvc.perform(multipart("/api/users")
+            .file(userPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("사용자 수정 성공")
+  void updateUser_Success() throws Exception {
+
+    // given
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "test@naver.com", "test1234");
+    UserDto user = userService.create(userReq, Optional.empty());
+    UUID userId = user.id();
+
+    // given
+    UserUpdateRequest userUpdateReq = new UserUpdateRequest("updateUser", "update@naver.com",
         "update1234");
 
-    // when
-    UserDto result = userService.update(savedUser.getId(), userReq, Optional.empty());
-
-    // then
-    assertThat(result.username()).isEqualTo("updateUser");
-    assertThat(result.email()).isEqualTo("update@naver.com");
-
-    User user = userRepository.findById(savedUser.getId()).orElseThrow();
-    assertThat(user.getUsername()).isEqualTo("updateUser");
-  }
-
-  @Test
-  @DisplayName("이미 존재하는 이름으로 수정 시 예외가 발생해야 한다.")
-  void updateUser_DuplicateName_TransactionRollback() {
-
-    // given
-    User duplicateUser = new User("duplicateUser", "duplicate@naver.com", "duplicate1234", null);
-    userRepository.save(duplicateUser);
-
-    UserUpdateRequest userReq = new UserUpdateRequest("duplicateUser", "test@naver.com",
-        "test1234");
+    MockMultipartFile userPart = new MockMultipartFile("userUpdateRequest",
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(userUpdateReq));
 
     // when & then
-    assertThatThrownBy(() -> userService.update(savedUser.getId(), userReq, Optional.empty()))
-        .isInstanceOf(UsernameAlreadyExistsException.class);
+    mockMvc.perform(multipart("/api/users/{userId}", userId)
+            .file(userPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .with(request -> {
+              request.setMethod("PATCH");
+              return request;
+            }))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(userId.toString()))
+        .andExpect(jsonPath("$.username").value("updateUser"))
+        .andExpect(jsonPath("$.email").value("update@naver.com"));
   }
 
   @Test
-  @DisplayName("사용자 삭제 시 더 이상 조회되지 않아야 한다.")
-  void deleteUser_Success() {
+  @DisplayName("사용자 수정 실패")
+  void updateUser_Failed() throws Exception {
 
-    // when
-    userService.delete(savedUser.getId());
+    // given
+    UUID nonExistUserId = UUID.randomUUID();
 
-    // then
-    Optional<User> result = userRepository.findById(savedUser.getId());
-    assertThat(result).isEmpty();
+    // given
+    UserUpdateRequest userUpdateReq = new UserUpdateRequest("updateUser", "update@naver.com",
+        "update1234");
+
+    MockMultipartFile userPart = new MockMultipartFile("userUpdateRequest",
+        "",
+        "application/json",
+        objectMapper.writeValueAsBytes(userUpdateReq));
+
+    // when & then
+    mockMvc.perform(multipart("/api/users/{userId}", nonExistUserId)
+            .file(userPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .with(request -> {
+              request.setMethod("PATCH");
+              return request;
+            }))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("사용자 삭제 성공")
+  void deleteUser_Success() throws Exception {
+
+    // given
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "test@naver.com", "test1234");
+    UserDto user = userService.create(userReq, Optional.empty());
+    UUID userId = user.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{userId}", userId))
+        .andExpect(status().isNoContent());
   }
 
   @Test
   @DisplayName("존재하지 않는 사용자 Id를 삭제하려고 할 시 예외가 발생해야 한다.")
-  void deleteUser_NotFound_Fail() {
+  void deleteUser_Failed() throws Exception {
 
     // given
     UUID nonExistsId = UUID.randomUUID();
 
     // when & then
-    assertThatThrownBy(() -> userService.delete(nonExistsId))
-        .isInstanceOf(UserNotFoundException.class);
+    mockMvc.perform(delete("/api/users/{userId}", nonExistsId))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  @DisplayName("전체 사용자 목록을 조회하면 저장된 모든 사용자가 반환되어야 한다.")
-  void findAllUsers_Success() {
+  @DisplayName("전체 사용자 목록 조회")
+  void findAllUsers_Success() throws Exception {
 
     // given
-    User savedUser2 = new User("통합테스트회원2", "integration2@naver.com", "integration1234", null);
-    new UserStatus(savedUser2, Instant.now());
-    userRepository.save(savedUser2);
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "test@naver.com", "test1234");
+    userService.create(userReq, Optional.empty());
 
-    // when
-    List<UserDto> result = userService.findAll();
+    UserCreateRequest userReq2 = new UserCreateRequest("testUser2", "test2@naver.com", "test1234");
+    userService.create(userReq2, Optional.empty());
 
-    // then
-    assertThat(result).hasSize(2);
-    assertThat(result).extracting("username")
-        .containsExactlyInAnyOrder("통합테스트회원", "통합테스트회원2");
-  }
-
-  @Test
-  @DisplayName("사용자가 한 명도 저장되어 있지 않을 경우 전체 조회를 하면 빈 리스트가 반환되어야 한다.")
-  void findAllUsers_Empty() {
-
-    // given
-    userRepository.deleteAll();
-
-    // when
-    List<UserDto> result = userService.findAll();
-
-    // then
-    assertThat(result).isEmpty();
+    // when & then
+    mockMvc.perform(get("/api/users")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].username").value("testUser"))
+        .andExpect(jsonPath("$[1].username").value("testUser2"))
+        .andExpect(jsonPath("$[0].email").value("test@naver.com"))
+        .andExpect(jsonPath("$[1].email").value("test2@naver.com"));
   }
 }

@@ -18,8 +18,8 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import com.sprint.mission.discodeit.service.basic.BasicUserService;
-import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
+import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +42,10 @@ public class UserControllerTest {
   private ObjectMapper objectMapper;
 
   @MockitoBean
-  private BasicUserService basicUserService;
+  private UserService userService;
 
   @MockitoBean
-  private BasicUserStatusService basicUserStatusService;
+  private UserStatusService userStatusService;
 
   private UUID userId;
   private UUID profileId;
@@ -86,7 +86,7 @@ public class UserControllerTest {
         "image/png",
         profileBytes);
 
-    given(basicUserService.create(any(), any())).willReturn(testUserDto);
+    given(userService.create(any(), any())).willReturn(testUserDto);
 
     // when & then
     mockMvc.perform(multipart("/api/users")
@@ -97,7 +97,7 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.username").value(testUser.getUsername()))
         .andExpect(jsonPath("$.id").exists());
 
-    then(basicUserService).should().create(eq(userReq), any());
+    then(userService).should().create(eq(userReq), any());
   }
 
   @Test
@@ -128,7 +128,7 @@ public class UserControllerTest {
         .andDo(print())
         .andExpect(status().isBadRequest());
 
-    then(basicUserService).shouldHaveNoInteractions();
+    then(userService).shouldHaveNoInteractions();
   }
 
   @Test
@@ -147,7 +147,7 @@ public class UserControllerTest {
         userJson.getBytes(StandardCharsets.UTF_8));
 
     testUserDto = new UserDto(userId, "updateTestUser", "test@naver.com", testProfileDto, true);
-    given(basicUserService.update(eq(userId), eq(userReq), any())).willReturn(testUserDto);
+    given(userService.update(eq(userId), eq(userReq), any())).willReturn(testUserDto);
 
     // when & then
     mockMvc.perform(multipart("/api/users/{userId}", userId)
@@ -160,7 +160,7 @@ public class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.username").value("updateTestUser"));
 
-    then(basicUserService).should().update(eq(userId), eq(userReq), any());
+    then(userService).should().update(eq(userId), eq(userReq), any());
   }
 
   @Test
@@ -179,7 +179,7 @@ public class UserControllerTest {
         userJson.getBytes(StandardCharsets.UTF_8));
 
     UUID nonExistentUserId = UUID.randomUUID();
-    given(basicUserService.update(eq(nonExistentUserId), any(), any()))
+    given(userService.update(eq(nonExistentUserId), any(), any()))
         .willThrow(new UserNotFoundException(nonExistentUserId));
 
     // when & then

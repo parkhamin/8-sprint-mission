@@ -1,184 +1,181 @@
 package com.sprint.mission.discodeit.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.ChannelDto;
+import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.ReadStatus;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
-import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.ReadStatusRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
 import com.sprint.mission.discodeit.service.ChannelService;
-import java.time.Instant;
+import com.sprint.mission.discodeit.service.UserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
 @Transactional
 @DisplayName("Channel 통합 테스트")
 public class ChannelIntegrationTest {
 
   @Autowired
-  private ChannelRepository channelRepository;
+  private MockMvc mockMvc;
 
   @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private ReadStatusRepository readStatusRepository;
-
-  @Autowired
-  private MessageRepository messageRepository;
+  private ObjectMapper objectMapper;
 
   @Autowired
   private ChannelService channelService;
 
-  private User savedUser;
-  private User savedUser2;
-  private Channel savedPublicChannel;
-  private Channel savedPrivateChannel;
-
-  @BeforeEach
-  void setUp() {
-    savedUser = new User("테스트회원1", "test@naver.com", "test1234", null);
-    new UserStatus(savedUser, Instant.now());
-
-    savedUser2 = new User("테스트회원2", "test2@naver.com", "test1234", null);
-    new UserStatus(savedUser2, Instant.now());
-
-    userRepository.save(savedUser);
-    userRepository.save(savedUser2);
-
-    savedPublicChannel = new Channel(ChannelType.PUBLIC, "[테스트]", "테스트 채널입니다.");
-    channelRepository.save(savedPublicChannel);
-
-    savedPrivateChannel = new Channel(ChannelType.PRIVATE);
-    channelRepository.save(savedPrivateChannel);
-  }
+  @Autowired
+  private UserService userService;
 
   @Test
-  @DisplayName("공개 채널 생성 시 트랜잭션이 올바르게 동작해야 한다.")
-  void createPublicChannel_TransactionCommit_Success() {
+  @DisplayName("공개 채널 생성 성공")
+  void createPublicChannel_Success() throws Exception {
 
     // given
-    PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest("[공지]", "공지 채널입니다.");
-
-    // when
-    ChannelDto result = channelService.create(channelReq);
-
-    // then
-    assertThat(result.id()).isNotNull();
-    assertThat(result.name()).isEqualTo("[공지]");
-    assertThat(result.type()).isEqualTo(ChannelType.PUBLIC);
-
-    Channel channel = channelRepository.findById(result.id()).orElseThrow();
-    assertThat(channel.getName()).isEqualTo("[공지]");
-    assertThat(channel.getDescription()).isEqualTo("공지 채널입니다.");
-  }
-
-  @Test
-  @DisplayName("비공개 채널 생성 시 참여자들의 읽음 상태가 함께 생성되어야 한다.")
-  void createPrivateChannel_TransactionCommit_Success() {
-
-    // given
-    List<UUID> participants = List.of(savedUser.getId(), savedUser2.getId());
-    PrivateChannelCreateRequest channelReq = new PrivateChannelCreateRequest(participants);
-
-    // when
-    ChannelDto result = channelService.create(channelReq);
-
-    // then
-    assertThat(result.id()).isNotNull();
-    assertThat(result.type()).isEqualTo(ChannelType.PRIVATE);
-    assertThat(result.participants().size()).isEqualTo(2);
-
-    Channel channel = channelRepository.findById(result.id()).orElseThrow();
-    assertThat(channel.getType()).isEqualTo(ChannelType.PRIVATE);
-
-    List<ReadStatus> readStatuses = readStatusRepository.findAllByChannelId(channel.getId());
-    assertThat(readStatuses).hasSize(2);
-  }
-
-  @Test
-  @DisplayName("공개 채널 수정 시 반영되어야 한다.")
-  void updateChannel_TransactionCommit_Success() {
-
-    // given
-    PublicChannelUpdateRequest channelReq = new PublicChannelUpdateRequest("[이름수정테스트]", null);
-
-    // when
-    ChannelDto result = channelService.update(savedPublicChannel.getId(), channelReq);
-
-    // then
-    assertThat(result.type()).isEqualTo(ChannelType.PUBLIC);
-    assertThat(result.name()).isEqualTo("[이름수정테스트]");
-    assertThat(result.description()).isEqualTo("테스트 채널입니다.");
-
-    Channel channel = channelRepository.findById(result.id()).orElseThrow();
-    assertThat(channel.getType()).isEqualTo(ChannelType.PUBLIC);
-    assertThat(channel.getName()).isEqualTo("[이름수정테스트]");
-    assertThat(channel.getDescription()).isEqualTo("테스트 채널입니다.");
-  }
-
-  @Test
-  @DisplayName("비공개 채널을 수정하려고 할 시 예외가 발생해야 한다.")
-  void updateChannel_PrivateChannel_Fail() {
-
-    // given
-    PublicChannelUpdateRequest channelReq = new PublicChannelUpdateRequest("[이름수정테스트]",
-        "공지 채널입니다.");
+    PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest("[공지]", "공지 채널입니다");
 
     // when & then
-    assertThatThrownBy(() -> channelService.update(savedPrivateChannel.getId(), channelReq))
-        .isInstanceOf(PrivateChannelUpdateException.class);
+    mockMvc.perform(post("/api/channels/public")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelReq)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").exists())
+        .andExpect(jsonPath("$.name").value("[공지]"))
+        .andExpect(jsonPath("$.description").value("공지 채널입니다"));
   }
 
   @Test
-  @DisplayName("채널 삭제 시 더 이상 조회되지 않아야 한다.")
-  void deleteChannel_Success() {
+  @DisplayName("공개 채널 생성 실패")
+  void createPublicChannel_Failed() throws Exception {
 
     // given
-    messageRepository.save(new Message("테스트", savedPublicChannel, savedUser, null));
-    readStatusRepository.save(new ReadStatus(savedUser, savedPublicChannel, Instant.now()));
-
-    // when
-    channelService.delete(savedPublicChannel.getId());
-
-    // then
-    assertThat(channelRepository.findById(savedPublicChannel.getId())).isEmpty();
-    assertThat(messageRepository.findTopByChannelIdOrderByCreatedAtDesc(
-        savedPublicChannel.getId())).isEmpty();
-    assertThat(readStatusRepository.findAllByChannelId(savedPublicChannel.getId())).isEmpty();
-  }
-
-  @Test
-  @DisplayName("존재하지 않는 채널 Id로 삭제하려고 할 시 예외가 발생해야 한다.")
-  void deleteChannel_NotFount_Fail() {
-
-    // given
-    UUID NonExistsChannelId = UUID.randomUUID();
+    PublicChannelCreateRequest channelReq = new PublicChannelCreateRequest("1", "공지 채널입니다");
 
     // when & then
-    assertThatThrownBy(() -> channelService.delete(NonExistsChannelId))
-        .isInstanceOf(ChannelNotFoundException.class);
+    mockMvc.perform(post("/api/channels/public")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelReq)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("비공개 채널 생성 성공")
+  void createPrivateChannel_Success() throws Exception {
+
+    // given
+    UserCreateRequest userReq = new UserCreateRequest("testUser", "test@naver.com", "test1234");
+    UserDto user = userService.create(userReq, Optional.empty());
+
+    UserCreateRequest userReq2 = new UserCreateRequest("testUser2", "test2@naver.com", "test1234");
+    UserDto user2 = userService.create(userReq2, Optional.empty());
+
+    PrivateChannelCreateRequest channelReq = new PrivateChannelCreateRequest(
+        List.of(user.id(), user2.id()));
+
+    // when & then
+    mockMvc.perform(post("/api/channels/private")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelReq)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").exists())
+        .andExpect(jsonPath("$.participants", hasSize(2)));
+  }
+
+  @Test
+  @DisplayName("비공개 채널 생성 실패")
+  void createPrivateChannel_Failed() throws Exception {
+    PrivateChannelCreateRequest channelReq = new PrivateChannelCreateRequest(List.of());
+
+    // when & then
+    mockMvc.perform(post("/api/channels/private")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelReq)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("공개 채널 수정 성공")
+  void updateChannel_Success() throws Exception {
+
+    // given
+    PublicChannelCreateRequest channelCreateReq = new PublicChannelCreateRequest("[공지]",
+        "공지 채널입니다");
+    ChannelDto channel = channelService.create(channelCreateReq);
+    UUID channelId = channel.id();
+
+    PublicChannelUpdateRequest channelUpdateReq = new PublicChannelUpdateRequest("[수정공지]", null);
+
+    // when & then
+    mockMvc.perform(patch("/api/channels/{channelId}", channelId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelUpdateReq)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(channelId.toString()))
+        .andExpect(jsonPath("$.name").value("[수정공지]"))
+        .andExpect(jsonPath("$.description").value("공지 채널입니다"));
+  }
+
+  @Test
+  @DisplayName("공개 채널 수정 실패")
+  void updateChannel_Failed() throws Exception {
+
+    // given
+    UUID nonExistChannelId = UUID.randomUUID();
+    PublicChannelCreateRequest channelCreateReq = new PublicChannelCreateRequest("[공지]",
+        "공지 채널입니다");
+
+    // when & then
+    mockMvc.perform(patch("/api/channels/{channelId}", nonExistChannelId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(channelCreateReq)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("채널 삭제 성공")
+  void deleteChannel_Success() throws Exception {
+
+    // given
+    PublicChannelCreateRequest channelCreateReq = new PublicChannelCreateRequest("[공지]",
+        "공지 채널입니다");
+    ChannelDto channel = channelService.create(channelCreateReq);
+    UUID channelId = channel.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/channels/{channelId}", channelId))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @DisplayName("채널 삭제 실패")
+  void deleteChannel_Failed() throws Exception {
+
+    // given
+    UUID nonExistChannelId = UUID.randomUUID();
+
+    // when & then
+    mockMvc.perform(delete("/api/channels/{channelId}", nonExistChannelId))
+        .andExpect(status().isNotFound());
   }
 }

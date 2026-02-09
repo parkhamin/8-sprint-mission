@@ -21,7 +21,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
-import com.sprint.mission.discodeit.service.basic.BasicMessageService;
+import com.sprint.mission.discodeit.service.MessageService;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -46,7 +46,7 @@ public class MessageControllerTest {
   private ObjectMapper objectMapper;
 
   @MockitoBean
-  private BasicMessageService basicMessageService;
+  private MessageService messageService;
 
   UUID channelId;
   UUID authorId;
@@ -85,7 +85,7 @@ public class MessageControllerTest {
         "application/json",
         messageJson.getBytes(StandardCharsets.UTF_8));
 
-    given(basicMessageService.create(any(), any())).willReturn(testMessageDto);
+    given(messageService.create(any(), any())).willReturn(testMessageDto);
 
     // when & then
     mockMvc.perform(multipart("/api/messages")
@@ -95,7 +95,7 @@ public class MessageControllerTest {
         .andExpect(jsonPath("$.content").value(testMessage.getContent()))
         .andExpect(jsonPath("$.id").exists());
 
-    then(basicMessageService).should().create(eq(messageReq), any());
+    then(messageService).should().create(eq(messageReq), any());
   }
 
   @Test
@@ -117,7 +117,7 @@ public class MessageControllerTest {
             .file(messagePart))
         .andExpect(status().isBadRequest());
 
-    then(basicMessageService).shouldHaveNoInteractions();
+    then(messageService).shouldHaveNoInteractions();
   }
 
   @Test
@@ -129,7 +129,7 @@ public class MessageControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
 
-    then(basicMessageService).should().delete(eq(messageId));
+    then(messageService).should().delete(eq(messageId));
   }
 
   @Test
@@ -139,12 +139,12 @@ public class MessageControllerTest {
     // given
     UUID invalidMessageId = UUID.randomUUID();
     willThrow(new MessageNotFoundException(invalidMessageId))
-        .given(basicMessageService).delete(eq(invalidMessageId));
+        .given(messageService).delete(eq(invalidMessageId));
 
     // when & then
     mockMvc.perform(delete("/api/messages/{messageId}", invalidMessageId))
         .andExpect(status().isNotFound());
 
-    then(basicMessageService).should().delete(eq(invalidMessageId));
+    then(messageService).should().delete(eq(invalidMessageId));
   }
 }
