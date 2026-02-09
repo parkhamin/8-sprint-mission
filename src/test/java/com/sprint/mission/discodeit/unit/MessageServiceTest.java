@@ -212,28 +212,30 @@ public class MessageServiceTest {
     void findByChannelId_ShouldSuccess() {
 
       // given
-      UUID cursor = UUID.randomUUID();
-      UUID nextCursorId = UUID.randomUUID();
+      Instant cursor = Instant.now();
       Pageable pageable = PageRequest.of(0, 50);
-      MessageDto mockDto = new MessageDto(nextCursorId, Instant.now(), Instant.now(), "content",
+
+      Instant nextCursor = Instant.now().minusSeconds(10);
+      MessageDto mockDto = new MessageDto(UUID.randomUUID(), nextCursor, Instant.now(),
+          "content",
           channelId, mockAuthorDto, List.of());
 
       List<Message> messageList = List.of(mockMessage);
       Slice<Message> slice = new SliceImpl<>(messageList, pageable, true);
       List<MessageDto> dtoList = List.of(mockDto);
 
-      given(messageRepository.findAllByCursor(eq(channelId), eq(cursor), eq(pageable))).willReturn(
-          slice);
+      given(messageRepository.findAllByChannelIdWithAuthor(eq(channelId), any(), eq(pageable)))
+          .willReturn(slice);
       given(messageMapper.toDto(mockMessage)).willReturn(mockDto);
 
       PageResponse<MessageDto> expectedResponse = new PageResponse<>(
           dtoList,
-          nextCursorId,
+          nextCursor,
           50,
           true,
           null
       );
-      given(pageResponseMapper.fromSlice(any(Slice.class), eq(nextCursorId))).willReturn(
+      given(pageResponseMapper.fromSlice(any(Slice.class), eq(nextCursor))).willReturn(
           expectedResponse);
 
       // when
@@ -247,14 +249,14 @@ public class MessageServiceTest {
     @Test
     @DisplayName("특정 채널의 메시지 목록 조회 실패 - 데이터가 없는 경우")
     void findByChannelId_ShouldFailed() {
-      UUID cursor = UUID.randomUUID();
+      Instant cursor = Instant.now();
       Pageable pageable = PageRequest.of(0, 50);
 
       List<Message> messageList = Collections.emptyList();
       Slice<Message> slice = new SliceImpl<>(messageList, pageable, false);
 
-      given(messageRepository.findAllByCursor(eq(channelId), eq(cursor), eq(pageable))).willReturn(
-          slice);
+      given(messageRepository.findAllByChannelIdWithAuthor(eq(channelId), any(), eq(pageable)))
+          .willReturn(slice);
 
       PageResponse<MessageDto> expectedResponse = new PageResponse<>(
           Collections.emptyList(),

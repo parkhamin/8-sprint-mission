@@ -7,9 +7,13 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Import(JpaConfig.class)
 @DataJpaTest
@@ -38,11 +43,15 @@ public class MessageRepositoryTest {
   @Autowired
   private ChannelRepository channelRepository;
 
+  @Autowired
+  private UserStatusRepository userStatusRepository;
+
   private User author;
   private Channel channel;
   private Message firstMessage;
   private Message secondMessage;
   private Message thirdMessage;
+  Instant now = Instant.now();
 
   @BeforeEach
   void setUp() {
@@ -51,11 +60,17 @@ public class MessageRepositoryTest {
     firstMessage = new Message("first", channel, author, null);
     secondMessage = new Message("second", channel, author, null);
     thirdMessage = new Message("third", channel, author, null);
+
     userRepository.save(author);
+    UserStatus status = new UserStatus(author, now);
+    userStatusRepository.save(status);
     channelRepository.save(channel);
-    messageRepository.save(firstMessage);
-    messageRepository.save(secondMessage);
-    messageRepository.save(thirdMessage);
+
+    ReflectionTestUtils.setField(firstMessage, "createdAt", now.minusSeconds(10));
+    ReflectionTestUtils.setField(secondMessage, "createdAt", now.minusSeconds(5));
+    ReflectionTestUtils.setField(thirdMessage, "createdAt", now);
+
+    messageRepository.saveAllAndFlush(List.of(firstMessage, secondMessage, thirdMessage));
   }
 
   @Test
@@ -66,7 +81,9 @@ public class MessageRepositoryTest {
     Pageable pageable = PageRequest.of(0, 2);
 
     // when
-    Slice<Message> result = messageRepository.findAllByCursor(channel.getId(), null, pageable);
+    Slice<Message> result = messageRepository.findAllByChannelIdWithAuthor(channel.getId(),
+        Instant.now().plusSeconds(1),
+        pageable);
 
     // then
     assertThat(result.getContent()).hasSize(2);
@@ -79,15 +96,18 @@ public class MessageRepositoryTest {
 
     // given
     Pageable pageable = PageRequest.of(0, 10);
+    Instant cursor = thirdMessage.getCreatedAt().plusSeconds(1);
 
     // when
-    Slice<Message> result = messageRepository.findAllByCursor(channel.getId(), thirdMessage.getId(),
+    Slice<Message> result = messageRepository.findAllByChannelIdWithAuthor(channel.getId(),
+        cursor,
         pageable);
 
     // then
-    assertThat(result.getContent()).hasSize(2);
+    assertThat(result.getContent()).hasSize(3);
     assertThat(result.getContent()).extracting(Message::getContent)
-        .containsExactlyInAnyOrder(firstMessage.getContent(), secondMessage.getContent());
+        .containsExactlyInAnyOrder(thirdMessage.getContent(), secondMessage.getContent(),
+            firstMessage.getContent());
     assertThat(result.hasNext()).isFalse();
   }
 
@@ -96,8 +116,8 @@ public class MessageRepositoryTest {
   void findAllByCursor_InvalidChannel() {
 
     // when
-    Slice<Message> result = messageRepository.findAllByCursor(
-        UUID.randomUUID(), null, PageRequest.of(0, 10));
+    Slice<Message> result = messageRepository.findAllByChannelIdWithAuthor(
+        UUID.randomUUID(), Instant.now(), PageRequest.of(0, 10));
 
     // then
     assertThat(result).isEmpty();
