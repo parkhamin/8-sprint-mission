@@ -140,7 +140,7 @@ public class UserServiceTest {
   class UserUpdateTests {
 
     @Test
-    @DisplayName("사용자 수정 성공 - 프로필 포함인 경우 ")
+    @DisplayName("사용자 수정 성공")
     void update_ShouldReturnUserDto() {
 
       // given
