@@ -16,6 +16,7 @@ import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
@@ -240,6 +241,53 @@ public class ChannelServiceTest {
           .isInstanceOf(ChannelNotFoundException.class);
 
       then(channelRepository).should().findById(eq(channelId));
+    }
+
+    @Test
+    @DisplayName("특정 사용자가 볼 수 있는 채널 목록 조회 성공인 경우")
+    void findAllByUserId_ShouldReturnChannelList() {
+
+      // given
+      UUID userId = UUID.randomUUID();
+      UUID subscribedChannelId = UUID.randomUUID();
+      UUID publicChannelId = UUID.randomUUID();
+
+      Channel subscribedChannel = new Channel(ChannelType.PRIVATE, "Private Channel",
+          "Description");
+      Channel mockSubscribedChannel = mock(Channel.class);
+      given(mockSubscribedChannel.getId()).willReturn(subscribedChannelId);
+
+      ReadStatus readStatus = mock(ReadStatus.class);
+      given(readStatus.getChannel()).willReturn(mockSubscribedChannel);
+
+      given(readStatusRepository.findAllByUserIdWithFetchJoin(userId))
+          .willReturn(List.of(readStatus));
+
+      Channel publicChannel = new Channel(ChannelType.PUBLIC, "Public Channel",
+          "Public Description");
+      List<Channel> visibleChannels = List.of(mockSubscribedChannel, publicChannel);
+
+      given(channelRepository.findAllPublicOrSubscribed(anyList())).willReturn(visibleChannels);
+
+      ChannelDto dto1 = new ChannelDto(subscribedChannelId, ChannelType.PRIVATE, "Private Channel",
+          null, List.of(), Instant.now());
+      ChannelDto dto2 = new ChannelDto(publicChannelId, ChannelType.PUBLIC, "Public Channel",
+          "Public Description", List.of(), Instant.now());
+
+      given(channelMapper.toDto(mockSubscribedChannel)).willReturn(dto1);
+      given(channelMapper.toDto(publicChannel)).willReturn(dto2);
+
+      // when
+      List<ChannelDto> result = basicChannelService.findAllByUserId(userId);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.size()).isEqualTo(2);
+      assertThat(result.get(0)).isEqualTo(dto1);
+      assertThat(result.get(1)).isEqualTo(dto2);
+
+      then(readStatusRepository).should().findAllByUserIdWithFetchJoin(userId);
+      then(channelRepository).should().findAllPublicOrSubscribed(anyList());
     }
   }
 }

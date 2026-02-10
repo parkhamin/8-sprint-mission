@@ -12,21 +12,27 @@ import static org.mockito.Mockito.never;
 
 import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.UserDto;
+import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentSaveFailedException;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +50,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class MessageServiceTest {
@@ -56,6 +63,12 @@ public class MessageServiceTest {
 
   @Mock
   private MessageRepository messageRepository;
+
+  @Mock
+  private BinaryContentRepository binaryContentRepository;
+
+  @Mock
+  private BinaryContentStorage binaryContentStorage;
 
   @Mock
   private MessageMapper messageMapper;
@@ -127,6 +140,51 @@ public class MessageServiceTest {
           .isInstanceOf(UserNotFoundException.class);
 
       then(messageRepository).should(never()).save(any(Message.class));
+    }
+
+    @Test
+    @DisplayName("메시지 생성 실패 - 메시지를 보낸 채널이 존재하지 않을 경우")
+    void create_WhenNotFoundChannel_ShouldThrowException() {
+
+      // given
+      MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
+
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.empty());
+
+      // when & then
+      assertThatThrownBy(() -> basicMessageService.create(messageReq, List.of()))
+          .isInstanceOf(ChannelNotFoundException.class);
+
+      then(messageRepository).should(never()).save(any(Message.class));
+    }
+
+    @Test
+    @DisplayName("메시지 생성 실패 - 첨부파일 저장 중 예외 발생")
+    void create_WhenStorageFail_ShouldThrowException() {
+
+      // given
+      MessageCreateRequest messageReq = new MessageCreateRequest("안녕", channelId, authorId);
+      BinaryContentCreateRequest fileReq = new BinaryContentCreateRequest("error_file.png",
+          "image/png", "test-data".getBytes());
+
+      UUID attachmentId = UUID.randomUUID();
+
+      given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(mockChannel));
+      given(userRepository.findById(eq(authorId))).willReturn(Optional.of(mockAuthor));
+      given(binaryContentRepository.save(any(BinaryContent.class))).willAnswer(invocation -> {
+        BinaryContent content = invocation.getArgument(0);
+        ReflectionTestUtils.setField(content, "id", attachmentId); // ID 강제 주입
+        return content;
+      });
+      given(binaryContentStorage.put(any(), any()))
+          .willThrow(new RuntimeException("Storage Error"));
+
+      // when & then
+      assertThatThrownBy(() -> basicMessageService.create(messageReq, List.of(fileReq)))
+          .isInstanceOf(BinaryContentSaveFailedException.class);
+
+      then(binaryContentRepository).should().save(any(BinaryContent.class));
+      then(messageRepository).shouldHaveNoInteractions();
     }
   }
 
@@ -206,6 +264,36 @@ public class MessageServiceTest {
   @Nested
   @DisplayName("메시지 조회 관련 테스트")
   class messageFindTests {
+
+    @Test
+    @DisplayName("메시지 조회 성공인 경우")
+    void find_ShouldReturnMessageDto() {
+
+      // given
+      given(messageRepository.findById(eq(messageId))).willReturn(Optional.of(mockMessage));
+      given(messageMapper.toDto(mockMessage)).willReturn(mockMessageDto);
+
+      // when
+      MessageDto result = basicMessageService.find(messageId);
+
+      // then
+      assertThat(result).isEqualTo(mockMessageDto);
+      assertThat(result.id()).isEqualTo(messageId);
+      assertThat(result.content()).isEqualTo(mockMessage.getContent());
+    }
+
+    @Test
+    @DisplayName("메시지 조회 실패 - 메시지가 존재하지 않는 경우")
+    void find_WhenNotFoundMessage_ShouldThrowException() {
+
+      // given
+      UUID nonExistMessageId = UUID.randomUUID();
+      given(messageRepository.findById(eq(nonExistMessageId))).willReturn(Optional.empty());
+
+      // when & then
+      assertThatThrownBy(() -> basicMessageService.find(nonExistMessageId))
+          .isInstanceOf(MessageNotFoundException.class);
+    }
 
     @Test
     @DisplayName("특정 채널의 메시지 목록 조회 성공인 경우")
