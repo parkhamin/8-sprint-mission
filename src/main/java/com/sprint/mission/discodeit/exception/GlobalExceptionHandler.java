@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException ex) {
-    log.error("입력값 검증 실패 - @RequestBody 검증 오류: {}", ex.getMessage());
+    log.warn("입력값 검증 실패 - @RequestBody 검증 오류: {}", ex.getMessage());
 
     HttpStatus status = HttpStatus.BAD_REQUEST;
 
