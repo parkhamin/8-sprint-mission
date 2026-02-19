@@ -27,7 +27,7 @@ public class Channel extends BaseUpdatableEntity {
   @Column(name = "name", length = 100)
   private String name;
 
-  @Size(max = 1000)
+  @Size(max = 500)
   @Column(name = "description", length = 500)
   private String description;
 
