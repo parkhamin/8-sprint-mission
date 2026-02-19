@@ -86,11 +86,8 @@ public class ChannelController implements ChannelApi {
 
   @GetMapping
   public ResponseEntity<List<ChannelDto>> findAllByUserId(@RequestParam("userId") UUID userId) {
-    log.info("[ChannelController] 특정 사용자가 볼 수 있는 채널 목록 조회 요청 - 사용자 Id: {}", userId);
-
     List<ChannelDto> channels = channelService.findAllByUserId(userId);
 
-    log.info("[ChannelController] 특정 사용자가 볼 수 있는 채널 목록 조회 완료 - 채널 목록 size: {}", channels.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(channels);

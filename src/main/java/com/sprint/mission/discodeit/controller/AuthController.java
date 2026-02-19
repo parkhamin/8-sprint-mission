@@ -24,11 +24,8 @@ public class AuthController implements AuthApi {
 
   @PostMapping(value = "/login")
   public ResponseEntity<UserDto> login(@Valid @RequestBody LoginRequest loginRequest) {
-    log.info("[AuthController] 로그인 요청 - 이름: {}", loginRequest.username());
-
     UserDto user = authService.login(loginRequest);
 
-    log.info("[AuthController] 로그인 완료 - 이름: {}", user.username());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(user);

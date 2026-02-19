@@ -101,12 +101,9 @@ public class MessageController implements MessageApi {
           direction = Direction.DESC
       ) Pageable pageable
   ) {
-    log.info("[MessageController] 특정 채널의 메시지 목록 조회 요청 - 채널 Id: {}, cursor: {}", channelId, cursor);
-
     PageResponse<MessageDto> messages = messageService.findAllByChannelId(channelId, cursor,
         pageable);
 
-    log.info("[MessageController] 특정 채널의 메시지 목록 조회 완료 - 메시지 size: {}", messages.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(messages);

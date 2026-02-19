@@ -27,11 +27,8 @@ public class BinaryContentController implements BinaryContentApi {
 
   @GetMapping("/{binaryContentId}")
   public ResponseEntity<BinaryContentDto> find(@PathVariable UUID binaryContentId) {
-    log.info("[BinaryContentController] 파일 조회 요청 - Id: {}", binaryContentId);
-
     BinaryContentDto binaryContent = binaryContentService.find(binaryContentId);
-
-    log.info("[BinaryContentController] 파일 조회 완료 - Id: {}", binaryContent.id());
+    
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContent);
@@ -40,11 +37,8 @@ public class BinaryContentController implements BinaryContentApi {
   @GetMapping
   public ResponseEntity<List<BinaryContentDto>> findAllByIdIn(
       @RequestParam("binaryContentIds") List<UUID> binaryContentIds) {
-    log.info("[BinaryContentController] 파일 조회 요청 - 요청 개수: {}개", binaryContentIds.size());
-
     List<BinaryContentDto> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);
 
-    log.info("[BinaryContentController] 파일 조회 완료 - 결과 개수: {}개", binaryContents.size());
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContents);
