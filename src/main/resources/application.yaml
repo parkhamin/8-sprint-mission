@@ -52,7 +52,7 @@ info:
     version: 1.7.0
     java:
       version: 17
-    spring-boot-version: "3.4.0"
+    spring-boot-version: "3.5.9"
 
   config:
     datasource:
