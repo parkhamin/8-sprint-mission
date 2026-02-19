@@ -10,6 +10,10 @@ public class BinaryContentException extends DiscodeitException {
     super(errorCode);
   }
 
+  public BinaryContentException(ErrorCode errorCode, Throwable cause) {
+    super(errorCode, cause);
+  }
+
   public BinaryContentException(ErrorCode errorCode, Map<String, Object> details) {
     super(errorCode, details);
   }

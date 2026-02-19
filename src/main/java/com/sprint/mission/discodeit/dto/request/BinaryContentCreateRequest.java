@@ -31,7 +31,7 @@ public record BinaryContentCreateRequest(
           file.getBytes()
       );
     } catch (IOException e) {
-      throw new BinaryContentConvertFailedException();
+      throw new BinaryContentConvertFailedException(e);
     }
   }
 }
