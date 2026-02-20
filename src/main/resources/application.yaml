@@ -4,29 +4,25 @@ server:
 spring:
   application:
     name: discodeit
+
+  boot:
+    admin:
+      client:
+        instance:
+          name: discodeit
+
+  profiles:
+    active: dev
+
   servlet:
     multipart:
-      maxFileSize: 10MB # 파일 하나의 최대 크기
-      maxRequestSize: 30MB
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/discodeit
-    username: discodeit_user
-    password: discodeit1234
-    # PostgreSQL createClob() 경고 메시지 제거
-    hikari:
-      connection-init-sql: SET SESSION hibernate.jdbc.lob.non_contextual_creation=true
+      max-file-size: 10MB
+      max-request-size: 30MB
+
   jpa:
     generate-ddl: false
-    database: Postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    properties:
-      open-in-view: false
-      hibernate:
-        format_sql: true
-        highlight_sql: true
-        use_sql_comments: true
-        default_batch_fetch_size: 100
+    hibernate:
+      ddl-auto: none
 
 discodeit:
   storage:
@@ -36,5 +32,37 @@ discodeit:
 
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
+    com.sprint.mission.discodeit: info
+
+# Spring Boot Actuator 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  info:
+    env:
+      enabled: true
+
+# Spring Boot Actuator info 추가
+info:
+  app:
+    name: Discodeit
+    version: 1.7.0
+    java:
+      version: 17
+    spring-boot-version: "3.5.9"
+
+  config:
+    datasource:
+      url: "${spring.datasource.url}"
+      driver-class-name: "${spring.datasource.driver-class-name}"
+    jpa:
+      ddl-auto: "${spring.jpa.hibernate.ddl-auto}"
+    storage:
+      type: "${discodeit.storage.type}"
+      path: "${discodeit.storage.local.root-path}"
+    multipart:
+      max-file-size: "${spring.servlet.multipart.max-file-size}"
+      max-request-size: "${spring.servlet.multipart.max-request-size}"

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.entity.Message;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
@@ -11,13 +12,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface MessageRepository extends JpaRepository<Message, UUID> {
 
-  @Query("SELECT m FROM Message m " +
-      "JOIN FETCH m.author " +
-      "JOIN FETCH m.channel " +
-      "WHERE m.channel.id = :channelId " +
-      "AND (:cursor IS NULL OR m.id < :cursor)")
-  Slice<Message> findAllByCursor(@Param("channelId") UUID channelId,
-      @Param("cursor") UUID cursor,
+  @Query("SELECT m FROM Message m "
+      + "JOIN FETCH m.channel c "
+      + "LEFT JOIN FETCH m.author a "
+      + "LEFT JOIN FETCH a.status "
+      + "LEFT JOIN FETCH a.profile "
+      + "WHERE m.channel.id=:channelId AND m.createdAt < :createdAt")
+  Slice<Message> findAllByChannelIdWithAuthor(@Param("channelId") UUID channelId,
+      @Param("createdAt") Instant createdAt,
       Pageable pageable);
 
   void deleteAllByChannelId(UUID channelId);

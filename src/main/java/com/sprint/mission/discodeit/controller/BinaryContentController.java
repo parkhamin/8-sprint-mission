@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/binaryContents")
@@ -23,21 +25,20 @@ public class BinaryContentController implements BinaryContentApi {
   private final BinaryContentService binaryContentService;
   private final BinaryContentStorage binaryContentStorage;
 
-  // 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
-  // BinaryContent find(UUID binaryContentId);
   @GetMapping("/{binaryContentId}")
   public ResponseEntity<BinaryContentDto> find(@PathVariable UUID binaryContentId) {
     BinaryContentDto binaryContent = binaryContentService.find(binaryContentId);
+    
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContent);
   }
 
-  // List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds);
   @GetMapping
   public ResponseEntity<List<BinaryContentDto>> findAllByIdIn(
       @RequestParam("binaryContentIds") List<UUID> binaryContentIds) {
     List<BinaryContentDto> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);
+
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContents);
@@ -45,7 +46,12 @@ public class BinaryContentController implements BinaryContentApi {
 
   @GetMapping("{binaryContentId}/download")
   public ResponseEntity<?> download(@PathVariable UUID binaryContentId) {
+    log.info("[BinaryContentController] 파일 다운로드 요청 - Id: {}", binaryContentId);
+
     BinaryContentDto binaryContentDto = binaryContentService.find(binaryContentId);
+
+    log.info("[BinaryContentController] 파일 정보 확인 완료 - 이름: {}, 크기: {} bytes",
+        binaryContentDto.fileName(), binaryContentDto.size());
     return binaryContentStorage.download(binaryContentDto);
   }
 }
