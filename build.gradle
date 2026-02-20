@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.sprint.mission'
-version = '0.0.1-SNAPSHOT'
+version = '1.2-M8'
 description = 'discodeit'
 
 java {
@@ -34,7 +34,6 @@ dependencies {
 
     // Monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'de.codecentric:spring-boot-admin-starter-client:3.4.5'
 
     // DB
     runtimeOnly 'org.postgresql:postgresql'
