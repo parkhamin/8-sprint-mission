@@ -1,7 +1,8 @@
-package com.sprint.mission.discodeit.s3;
+package com.sprint.mission.discodeit.storage.s3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.sprint.mission.discodeit.storage.S3Properties;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
