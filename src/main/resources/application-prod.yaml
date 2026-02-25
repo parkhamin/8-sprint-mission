@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: discodeit
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      connection-init-sql: SET SESSION hibernate.jdbc.lob.non_contextual_creation=true
+  jpa:
+    generate-ddl: false
+    database: Postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      open-in-view: false
+      hibernate:
+        format_sql: false
+        highlight_sql: false
+        use_sql_comments: false
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    com.sprint.mission.discodeit: info
+    org.hibernate.SQL: info
+    org.hibernate.orm.jdbc.bind: info
+
